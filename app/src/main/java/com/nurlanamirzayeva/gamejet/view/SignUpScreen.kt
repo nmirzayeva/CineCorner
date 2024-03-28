@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -38,12 +41,13 @@ import com.nurlanamirzayeva.gamejet.Screens
 import com.nurlanamirzayeva.gamejet.utils.CONFIRM_PASSWORD
 import com.nurlanamirzayeva.gamejet.utils.COUNTRY_CODE
 import com.nurlanamirzayeva.gamejet.utils.EMAIL
+import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import com.nurlanamirzayeva.gamejet.utils.PASSWORD
 import com.nurlanamirzayeva.gamejet.viewmodel.SignUpViewModel
 
 
 @Composable
-fun SignUp(navController: NavHostController,signUpViewModel: SignUpViewModel) {
+fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -52,169 +56,194 @@ fun SignUp(navController: NavHostController,signUpViewModel: SignUpViewModel) {
     val signUpSuccess = signUpViewModel.signUpSuccess.collectAsState()
     val context = LocalContext.current
 
+    Box {
+        Column(modifier = Modifier.run {
+            fillMaxSize()
+                .background(color = colorResource(id = R.color.dark_grey))
+                .padding(start = 16.dp, end = 16.dp, top = 80.dp, bottom = 30.dp)
+
+        }
+
+        ) {
+            Text(
+                "Create a new account",
+                color = Color.White,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                "Enter your data to create an account for",
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                modifier = Modifier.padding(top = 12.dp)
+            )
+            Text(
+                "getting new friends and news",
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal
+            )
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(vertical = 30.dp)
+            ) {
+                Text(
+                    "E-mail",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                TextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(45.dp)
+                        .background(
+                            colorResource(id = R.color.soft_dark),
+                            shape = RoundedCornerShape(8.dp)
+                        ),
+                    label = { Text("Enter e-mail") }
+                )
+                Text(
+                    "Country",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                TextField(
+                    value = countryCode,
+                    onValueChange = { countryCode = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(45.dp)
+                        .background(
+                            colorResource(id = R.color.soft_dark),
+                            shape = RoundedCornerShape(8.dp)
+                        ),
+                    label = { Text("Enter password") }
+                )
+
+                Text(
+                    "Password",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                TextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(45.dp)
+                        .background(
+                            colorResource(id = R.color.soft_dark),
+                            shape = RoundedCornerShape(8.dp)
+                        ),
+                    label = { Text("**********") },
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                Text(
+                    "Confirm ",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                TextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(45.dp)
+                        .background(
+                            colorResource(id = R.color.soft_dark),
+                            shape = RoundedCornerShape(8.dp)
+                        ),
+                    label = { Text("**********") },
+                    visualTransformation = PasswordVisualTransformation()
+                )
+            }
+
+            Button(
+                onClick = {
+
+                    signUpViewModel.signUp(
+                        context, userMap = hashMapOf(
+                            EMAIL to email,
+                            PASSWORD to password,
+                            CONFIRM_PASSWORD to confirmPassword,
+                            COUNTRY_CODE to countryCode
+                        )
+                    )
+
+                }, colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(
+                        id = R.color.green
+                    )
+                ), shape = RoundedCornerShape(8.dp), modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
 
 
-        when (signUpSuccess.value) {
-            true -> {
+            ) {
+                Text(
+                    "LOGIN",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp), horizontalArrangement = Arrangement.Center
+            ) {
+                Text("Already have an account?  ", color = Color.White, fontSize = 14.sp)
+                Text(
+                    "Log in",
+                    color = colorResource(id = R.color.sky_blue),
+                    fontSize = 14.sp,
+                    modifier = Modifier.clickable { navController.navigate(Screens.SignIn) })
+
+
+            }
+        }
+
+        when (val response = signUpSuccess.value) {
+
+            is NetworkState.Loading -> {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center).size(50.dp))
+            }
+
+            is NetworkState.Success -> {
                 Toast.makeText(context, "Sign up successful! Please log in.", Toast.LENGTH_SHORT)
                     .show()
                 navController.navigate(Screens.SignIn)
                 signUpViewModel.reset()
             }
 
-            false -> {
-                Toast.makeText(context, "$errorMessage", Toast.LENGTH_SHORT).show()
+            is NetworkState.Error -> {
+                Toast.makeText(
+                    context,
+                    response.errorMessage
+                        ?: context.getString(R.string.default_error_message),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
-            null -> {
-
-            }
+            null -> {}
         }
-
-
-
-
-
-    Column(modifier = Modifier.run {
-        fillMaxSize()
-            .background(color = colorResource(id = R.color.dark_grey))
-            .padding(start = 16.dp, end = 16.dp, top = 80.dp, bottom = 30.dp)
-
 
     }
 
-    ) {
-        Text(
-            "Create a new account",
-            color = Color.White,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-        Text(
-            "Enter your data to create an account for",
-            color = Color.White,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal,
-            modifier = Modifier.padding(top = 12.dp)
-        )
-        Text(
-            "getting new friends and news",
-            color = Color.White,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal
-        )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.padding(vertical = 30.dp)
-        ) {
-            Text("E-mail", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
-
-            TextField(
-                value = email,
-                onValueChange = { email = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(45.dp)
-                    .background(
-                        colorResource(id = R.color.soft_dark),
-                        shape = RoundedCornerShape(8.dp)
-                    ),
-                label = { Text("Enter e-mail") }
-            )
-            Text("Country", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
-
-            TextField(
-                value = countryCode,
-                onValueChange = { countryCode = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(45.dp)
-                    .background(
-                        colorResource(id = R.color.soft_dark),
-                        shape = RoundedCornerShape(8.dp)
-                    ),
-                label = { Text("Enter password") }
-            )
-
-            Text("Password", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
-
-            TextField(
-                value = password,
-                onValueChange = { password = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(45.dp)
-                    .background(
-                        colorResource(id = R.color.soft_dark),
-                        shape = RoundedCornerShape(8.dp)
-                    ),
-                label = { Text("**********") },
-                visualTransformation = PasswordVisualTransformation()
-            )
-            Text("Confirm ", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Medium)
-
-            TextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(45.dp)
-                    .background(
-                        colorResource(id = R.color.soft_dark),
-                        shape = RoundedCornerShape(8.dp)
-                    ),
-                label = { Text("**********") },
-                visualTransformation = PasswordVisualTransformation()
-            )
-        }
-
-
-
-
-
-        Button(
-            onClick = {
-
-                signUpViewModel.signUp(userMap= hashMapOf(EMAIL to email, PASSWORD to password,
-                    CONFIRM_PASSWORD to confirmPassword, COUNTRY_CODE to countryCode))
-
-
-
-                      }, colors = ButtonDefaults.buttonColors(
-                containerColor = colorResource(
-                    id = R.color.green
-                )
-            ), shape = RoundedCornerShape(8.dp), modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-
-
-        ) {
-            Text(
-                "LOGIN",
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp), horizontalArrangement = Arrangement.Center
-        ) {
-            Text("Already have an account?  ", color = Color.White, fontSize = 14.sp)
-            Text(
-                "Log in",
-                color = colorResource(id = R.color.sky_blue),
-                fontSize = 14.sp,
-                modifier = Modifier.clickable { navController.navigate(Screens.SignIn) })
-
-
-        }
-    }
 
 }
 

@@ -32,12 +32,12 @@ class SignUpRepository {
         val email = userMap[EMAIL]
 
         val successListener = OnSuccessListener<Void> {
-            trySend(true)
+            trySend(NetworkState.Success(true))
         }
 
         val failureListener = object : OnFailureListener {
             override fun onFailure(p0: Exception) {
-                trySend(false)
+                trySend(NetworkState.Error(p0.localizedMessage))
             }
         }
         auth.createUserWithEmailAndPassword(email!!, password!!).addOnSuccessListener {

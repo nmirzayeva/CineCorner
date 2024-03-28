@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "671544793824",
+    "firebase_url": "https://gamejet-8f0da-default-rtdb.firebaseio.com",
+    "project_id": "gamejet-8f0da",
+    "storage_bucket": "gamejet-8f0da.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671544793824:android:a9f67deb98b54038850e85",
+        "android_client_info": {
+          "package_name": "com.nurlanamirzayeva.gamejet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "671544793824-kpcsp5lr65dlb186q0biqk6hgjubpn19.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nurlanamirzayeva.gamejet",
+            "certificate_hash": "54f3bb6727efb7aca38b49f182fb53ab6dc1c017"
+          }
+        },
+        {
+          "client_id": "671544793824-i38iu1ta37sng9f9q1esng4bmukr42hn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdaREjd9Ip1Cqh1iuVN0lVsH8WvNUlyjA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "671544793824-i38iu1ta37sng9f9q1esng4bmukr42hn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

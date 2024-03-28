@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "671544793824",
+    "project_id": "gamejet-8f0da",
+    "storage_bucket": "gamejet-8f0da.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671544793824:android:a9f67deb98b54038850e85",
+        "android_client_info": {
+          "package_name": "com.nurlanamirzayeva.gamejet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdaREjd9Ip1Cqh1iuVN0lVsH8WvNUlyjA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

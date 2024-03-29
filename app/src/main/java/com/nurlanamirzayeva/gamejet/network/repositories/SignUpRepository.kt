@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.nurlanamirzayeva.gamejet.utils.COUNTRY_CODE
 import com.nurlanamirzayeva.gamejet.utils.EMAIL
@@ -21,12 +22,13 @@ import kotlinx.coroutines.tasks.await
 import java.lang.Exception
 import java.util.Locale.IsoCountryCode
 import java.util.UUID
+import javax.inject.Inject
 
-class SignUpRepository {
-    private val auth = FirebaseAuth.getInstance()
-    private val database = Firebase.firestore.collection("users")
+class SignUpRepository @Inject constructor(private val auth:FirebaseAuth, private val fireStore: FirebaseFirestore) {
 
-    suspend fun signUp(userMap: HashMap<String, String>) = callbackFlow {
+    private val database = fireStore.collection("users")
+
+    suspend fun signUp(userMap: HashMap<String, String>) =  callbackFlow {
 
         val password = userMap[PASSWORD]
         val email = userMap[EMAIL]

@@ -18,7 +18,7 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = grey,
     secondary = dark_grey,
-    tertiary = black
+    tertiary = green
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -41,7 +41,7 @@ private val LightColorScheme = lightColorScheme(
 fun GameJetTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

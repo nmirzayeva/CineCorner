@@ -5,3 +5,4 @@ sealed class NetworkState<T>(data:T?=null,errorMessage:String?=null){
     data class Error<T>(val errorMessage: String?):NetworkState<T>(null,errorMessage)
     class Loading<T>:NetworkState<T>()
 }
+

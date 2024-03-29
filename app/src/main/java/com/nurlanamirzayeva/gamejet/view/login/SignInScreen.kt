@@ -1,4 +1,4 @@
-package com.nurlanamirzayeva.gamejet.view
+package com.nurlanamirzayeva.gamejet.view.login
 
 import android.text.Layout
 import androidx.compose.foundation.background
@@ -13,9 +13,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 
 import androidx.compose.runtime.Composable
@@ -32,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.Screens
+import com.nurlanamirzayeva.gamejet.ui.theme.green
 
 
 @Composable
@@ -41,14 +45,16 @@ fun SignIn(navController: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.dark_grey))
+            .verticalScroll(rememberScrollState())
             .padding(start = 16.dp, end = 16.dp, top = 90.dp, bottom = 30.dp),
+
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(45.dp)
 
 
     ) {
 
-        Text("GameJet", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Medium)
+        Text("GameJet", color = green, fontSize = 32.sp, fontWeight = FontWeight.Medium)
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
 
@@ -104,7 +110,6 @@ fun SignIn(navController: NavHostController) {
                     .fillMaxWidth()
                     .padding(vertical = 18.dp), horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Remember Me", color = Color.White, fontSize = 14.sp)
                 Text("Forgot Password?", color = Color.White, fontSize = 14.sp)
 
             }
@@ -112,9 +117,7 @@ fun SignIn(navController: NavHostController) {
 
             Button(
                 onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(
-                        id = R.color.green
-                    )
+                    containerColor = MaterialTheme.colorScheme.tertiary
                 ), shape = RoundedCornerShape(8.dp), modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
@@ -128,7 +131,9 @@ fun SignIn(navController: NavHostController) {
                 )
             }
 
-            Row(modifier = Modifier.fillMaxWidth().padding(vertical=12.dp), horizontalArrangement = Arrangement.Center) {
+            Row(modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp), horizontalArrangement = Arrangement.Center) {
                 Text("Don't have an account?  ", color = Color.White, fontSize = 14.sp)
                 Text("Create an account", color = colorResource(id = R.color.sky_blue),fontSize = 14.sp, modifier = Modifier.clickable { navController.navigate(route=Screens.SignUp) })
 

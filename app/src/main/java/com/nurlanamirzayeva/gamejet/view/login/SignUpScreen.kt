@@ -1,8 +1,10 @@
-package com.nurlanamirzayeva.gamejet.view
+package com.nurlanamirzayeva.gamejet.view.login
 
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,14 +14,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,16 +32,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.Screens
+import com.nurlanamirzayeva.gamejet.ui.components.CustomOutlinedTextField
+import com.nurlanamirzayeva.gamejet.ui.theme.green
 import com.nurlanamirzayeva.gamejet.utils.CONFIRM_PASSWORD
 import com.nurlanamirzayeva.gamejet.utils.COUNTRY_CODE
 import com.nurlanamirzayeva.gamejet.utils.EMAIL
@@ -45,22 +53,25 @@ import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import com.nurlanamirzayeva.gamejet.utils.PASSWORD
 import com.nurlanamirzayeva.gamejet.viewmodel.SignUpViewModel
 
-
 @Composable
-fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var countryCode by remember { mutableStateOf("+1") }
+fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = hiltViewModel()) {
+    var email by remember { mutableStateOf(TextFieldValue()) }
+    var password by remember { mutableStateOf(TextFieldValue()) }
+    var confirmPassword by remember { mutableStateOf(TextFieldValue()) }
+    var countryCode by remember { mutableStateOf(TextFieldValue()) }
     val errorMessage = signUpViewModel.errorMessage.collectAsState()
     val signUpSuccess = signUpViewModel.signUpSuccess.collectAsState()
     val context = LocalContext.current
+
+
 
     Box {
         Column(modifier = Modifier.run {
             fillMaxSize()
                 .background(color = colorResource(id = R.color.dark_grey))
+                .verticalScroll(rememberScrollState())
                 .padding(start = 16.dp, end = 16.dp, top = 80.dp, bottom = 30.dp)
+
 
         }
 
@@ -96,18 +107,12 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel) {
                     fontWeight = FontWeight.Medium
                 )
 
-                TextField(
+                CustomOutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(45.dp)
-                        .background(
-                            colorResource(id = R.color.soft_dark),
-                            shape = RoundedCornerShape(8.dp)
-                        ),
-                    label = { Text("Enter e-mail") }
+                    labelText = "Enter an email",
                 )
+
                 Text(
                     "Country",
                     color = Color.White,
@@ -120,11 +125,10 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel) {
                     onValueChange = { countryCode = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(45.dp)
-                        .background(
-                            colorResource(id = R.color.soft_dark),
-                            shape = RoundedCornerShape(8.dp)
-                        ),
+                        .height(45.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    singleLine = true,
+
                     label = { Text("Enter password") }
                 )
 
@@ -135,21 +139,16 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel) {
                     fontWeight = FontWeight.Medium
                 )
 
-                TextField(
+
+                CustomOutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(45.dp)
-                        .background(
-                            colorResource(id = R.color.soft_dark),
-                            shape = RoundedCornerShape(8.dp)
-                        ),
-                    label = { Text("**********") },
+                    labelText = "*****",
                     visualTransformation = PasswordVisualTransformation()
+
                 )
                 Text(
-                    "Confirm ",
+                    text = "Confirm ",
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium
@@ -157,17 +156,19 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel) {
 
                 TextField(
                     value = confirmPassword,
-                    onValueChange = { confirmPassword = it },
+                    onValueChange = {
+                        confirmPassword = it
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(45.dp)
-                        .background(
-                            colorResource(id = R.color.soft_dark),
-                            shape = RoundedCornerShape(8.dp)
-                        ),
+                        .height(45.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
                     label = { Text("**********") },
-                    visualTransformation = PasswordVisualTransformation()
                 )
+
+
             }
 
             Button(
@@ -175,17 +176,15 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel) {
 
                     signUpViewModel.signUp(
                         context, userMap = hashMapOf(
-                            EMAIL to email,
-                            PASSWORD to password,
-                            CONFIRM_PASSWORD to confirmPassword,
-                            COUNTRY_CODE to countryCode
+                            EMAIL to email.text,
+                            PASSWORD to password.text,
+                            CONFIRM_PASSWORD to confirmPassword.text,
+                            COUNTRY_CODE to countryCode.text
                         )
                     )
 
                 }, colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(
-                        id = R.color.green
-                    )
+                    containerColor = green
                 ), shape = RoundedCornerShape(8.dp), modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
@@ -193,7 +192,7 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel) {
 
             ) {
                 Text(
-                    "LOGIN",
+                    "SIGN UP",
                     color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold
@@ -220,7 +219,11 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel) {
         when (val response = signUpSuccess.value) {
 
             is NetworkState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center).size(50.dp))
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(50.dp)
+                )
             }
 
             is NetworkState.Success -> {

@@ -4,9 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.nurlanamirzayeva.gamejet.network.repositories.SignUpRepository
-import com.nurlanamirzayeva.gamejet.view.SignIn
-import com.nurlanamirzayeva.gamejet.view.SignUp
+import com.nurlanamirzayeva.gamejet.view.login.SignIn
+import com.nurlanamirzayeva.gamejet.view.login.SignUp
 import com.nurlanamirzayeva.gamejet.viewmodel.SignUpViewModel
 
 

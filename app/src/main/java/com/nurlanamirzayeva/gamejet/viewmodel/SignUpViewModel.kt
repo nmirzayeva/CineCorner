@@ -16,6 +16,7 @@ import com.nurlanamirzayeva.gamejet.utils.COUNTRY_CODE
 import com.nurlanamirzayeva.gamejet.utils.EMAIL
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import com.nurlanamirzayeva.gamejet.utils.PASSWORD
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,8 +25,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.observeOn
 import kotlinx.coroutines.launch
 import java.util.Locale.IsoCountryCode
-
-class SignUpViewModel(private val repository: SignUpRepository):ViewModel() {
+import javax.inject.Inject
+@HiltViewModel
+class SignUpViewModel @Inject constructor(private val repository: SignUpRepository):ViewModel() {
 
     private val _signUpSuccess = MutableStateFlow<NetworkState<Boolean>?>(null)
     val signUpSuccess = _signUpSuccess.asStateFlow()

@@ -3,8 +3,6 @@ package com.nurlanamirzayeva.gamejet.view.login
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,9 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,12 +40,14 @@ import androidx.navigation.NavHostController
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.CustomOutlinedTextField
+import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.green
+import com.nurlanamirzayeva.gamejet.ui.theme.sky_blue
 import com.nurlanamirzayeva.gamejet.utils.CONFIRM_PASSWORD
-import com.nurlanamirzayeva.gamejet.utils.COUNTRY_CODE
 import com.nurlanamirzayeva.gamejet.utils.EMAIL
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import com.nurlanamirzayeva.gamejet.utils.PASSWORD
+import com.nurlanamirzayeva.gamejet.utils.USERNAME
 import com.nurlanamirzayeva.gamejet.viewmodel.SignUpViewModel
 
 @Composable
@@ -58,7 +55,7 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
     var email by remember { mutableStateOf(TextFieldValue()) }
     var password by remember { mutableStateOf(TextFieldValue()) }
     var confirmPassword by remember { mutableStateOf(TextFieldValue()) }
-    var countryCode by remember { mutableStateOf(TextFieldValue()) }
+    var username by remember { mutableStateOf(TextFieldValue()) }
     val errorMessage = signUpViewModel.errorMessage.collectAsState()
     val signUpSuccess = signUpViewModel.signUpSuccess.collectAsState()
     val context = LocalContext.current
@@ -68,9 +65,9 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
     Box {
         Column(modifier = Modifier.run {
             fillMaxSize()
-                .background(color = colorResource(id = R.color.dark_grey))
+                .background(color = dark_grey)
                 .verticalScroll(rememberScrollState())
-                .padding(start = 16.dp, end = 16.dp, top = 80.dp, bottom = 30.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 64.dp, bottom = 30.dp)
 
 
         }
@@ -79,63 +76,58 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
             Text(
                 "Create a new account",
                 color = Color.White,
-                fontSize = 22.sp,
+                fontSize = 32.sp,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                "Enter your data to create an account for",
+                "Enter your data to create an account for getting",
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 10.dp)
             )
             Text(
-                "getting new friends and news",
+                "new friends and news",
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Normal
             )
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.padding(vertical = 30.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(vertical = 28.dp)
             ) {
                 Text(
                     "E-mail",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Medium
                 )
 
                 CustomOutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    labelText = "Enter an email",
-                )
+                    labelText = "Enter e-mail",
+
+                    )
 
                 Text(
-                    "Country",
+                    "Username",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Medium
                 )
 
-                TextField(
-                    value = countryCode,
-                    onValueChange = { countryCode = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(45.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    singleLine = true,
-
-                    label = { Text("Enter password") }
+                CustomOutlinedTextField(
+                    value = username,
+                    onValueChange = { username = it },
+                    labelText = "Enter an username"
                 )
 
                 Text(
                     "Password",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Medium
                 )
 
@@ -143,31 +135,24 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
                 CustomOutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    labelText = "*****",
+                    labelText = "**********",
                     visualTransformation = PasswordVisualTransformation()
 
                 )
                 Text(
-                    text = "Confirm ",
+                    text = "Confirm password",
                     color = Color.White,
-                    fontSize = 18.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Medium
                 )
 
-                TextField(
+                CustomOutlinedTextField(
                     value = confirmPassword,
-                    onValueChange = {
-                        confirmPassword = it
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(45.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    label = { Text("**********") },
-                )
+                    onValueChange = { confirmPassword = it },
+                    labelText = "**********",
+                    visualTransformation = PasswordVisualTransformation()
 
+                )
 
             }
 
@@ -179,7 +164,7 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
                             EMAIL to email.text,
                             PASSWORD to password.text,
                             CONFIRM_PASSWORD to confirmPassword.text,
-                            COUNTRY_CODE to countryCode.text
+                            USERNAME to username.text
                         )
                     )
 
@@ -194,7 +179,7 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
                 Text(
                     "SIGN UP",
                     color = Color.White,
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -203,13 +188,13 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp), horizontalArrangement = Arrangement.Center
+                    .padding(vertical = 20.dp), horizontalArrangement = Arrangement.Center
             ) {
-                Text("Already have an account?  ", color = Color.White, fontSize = 14.sp)
+                Text("Already have an account?  ", color = Color.White, fontSize = 16.sp)
                 Text(
                     "Log in",
-                    color = colorResource(id = R.color.sky_blue),
-                    fontSize = 14.sp,
+                    color = sky_blue,
+                    fontSize = 16.sp,
                     modifier = Modifier.clickable { navController.navigate(Screens.SignIn) })
 
 

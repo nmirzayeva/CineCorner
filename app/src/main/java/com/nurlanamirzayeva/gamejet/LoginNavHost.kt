@@ -6,23 +6,33 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nurlanamirzayeva.gamejet.view.login.SignIn
 import com.nurlanamirzayeva.gamejet.view.login.SignUp
+import com.nurlanamirzayeva.gamejet.view.mainpage.MainPage
+import com.nurlanamirzayeva.gamejet.viewmodel.SignInViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.SignUpViewModel
 
 
 @Composable
 
-fun LoginNavGraph(navController: NavHostController,signUpViewModel: SignUpViewModel) {
+fun LoginNavGraph(
+    navController: NavHostController,
+    signUpViewModel: SignUpViewModel,
+    signInViewModel: SignInViewModel
+) {
 
-    NavHost(navController = navController , startDestination = Screens.SignIn ){
-        composable(route="SignIn"){
+    NavHost(navController = navController, startDestination = Screens.SignIn) {
+        composable(route = "SignIn") {
 
-          SignIn(navController=navController)
+            SignIn(navController = navController, signInViewModel = signInViewModel)
 
 
         }
-        composable(route="SignUp"){
+        composable(route = "SignUp") {
 
-            SignUp(navController=navController,signUpViewModel=signUpViewModel)
+            SignUp(navController = navController, signUpViewModel = signUpViewModel)
+        }
+        composable(route = "MainPage") {
+
+            MainPage(navController = navController)
         }
 
 
@@ -30,8 +40,9 @@ fun LoginNavGraph(navController: NavHostController,signUpViewModel: SignUpViewMo
 
 }
 
-    object Screens {
-        const val SignIn = "SignIn"
-        const val SignUp = "SignUp"
+object Screens {
+    const val SignIn = "SignIn"
+    const val SignUp = "SignUp"
+    const val MainPage = "MainPage"
 
-    }
+}

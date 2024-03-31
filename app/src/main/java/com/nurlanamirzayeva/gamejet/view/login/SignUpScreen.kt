@@ -1,6 +1,7 @@
 package com.nurlanamirzayeva.gamejet.view.login
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,10 +30,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -56,10 +58,14 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
     var password by remember { mutableStateOf(TextFieldValue()) }
     var confirmPassword by remember { mutableStateOf(TextFieldValue()) }
     var username by remember { mutableStateOf(TextFieldValue()) }
-    val errorMessage = signUpViewModel.errorMessage.collectAsState()
     val signUpSuccess = signUpViewModel.signUpSuccess.collectAsState()
     val context = LocalContext.current
-
+    var passwordVisible by remember {
+        mutableStateOf(false)
+    }
+    var confirmPasswordVisible by remember {
+        mutableStateOf(false)
+    }
 
 
     Box {
@@ -115,7 +121,7 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
                     "Username",
                     color = Color.White,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
                 )
 
                 CustomOutlinedTextField(
@@ -123,6 +129,8 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
                     onValueChange = { username = it },
                     labelText = "Enter an username"
                 )
+
+
 
                 Text(
                     "Password",
@@ -136,9 +144,21 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
                     value = password,
                     onValueChange = { password = it },
                     labelText = "**********",
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        Image(painter = if (passwordVisible) painterResource(R.drawable.eye_low_solid) else painterResource(
+                            id = R.drawable.eye_solid
+                        ),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .height(60.dp)
+                                .clickable { passwordVisible = !passwordVisible })
+                    }
 
                 )
+
+
+
                 Text(
                     text = "Confirm password",
                     color = Color.White,
@@ -150,7 +170,17 @@ fun SignUp(navController: NavHostController, signUpViewModel: SignUpViewModel = 
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
                     labelText = "**********",
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        Image(painter = if (confirmPasswordVisible) painterResource(R.drawable.eye_low_solid) else painterResource(
+                            id = R.drawable.eye_solid
+                        ),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .height(60.dp)
+                                .clickable { confirmPasswordVisible = !confirmPasswordVisible })
+                    }
+
 
                 )
 

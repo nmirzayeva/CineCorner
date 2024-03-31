@@ -29,6 +29,7 @@ fun CustomOutlinedTextField(
     shape: Shape = RoundedCornerShape(8.dp),
     singleLine: Boolean = true,
     labelText: String,
+    trailingIcon: @Composable (() -> Unit)? = null,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
         focusedContainerColor = black,
         unfocusedContainerColor = black,
@@ -40,8 +41,11 @@ fun CustomOutlinedTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
 
+
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+
+
 
     OutlinedTextField(
 
@@ -58,7 +62,10 @@ fun CustomOutlinedTextField(
         placeholder = { if (!isFocused) Text(text = labelText, color = Color.Gray) },
         singleLine = singleLine,
         interactionSource = interactionSource,
-        visualTransformation = visualTransformation
+        visualTransformation = visualTransformation,
+        trailingIcon = trailingIcon
+
     )
+
 
 }

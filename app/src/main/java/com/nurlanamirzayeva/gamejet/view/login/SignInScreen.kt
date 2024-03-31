@@ -1,9 +1,9 @@
 package com.nurlanamirzayeva.gamejet.view.login
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,23 +26,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.CustomOutlinedTextField
-import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
 import com.nurlanamirzayeva.gamejet.ui.theme.green
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
-import com.nurlanamirzayeva.gamejet.view.mainpage.MainPage
 import com.nurlanamirzayeva.gamejet.viewmodel.SignInViewModel
 
 
@@ -52,6 +53,9 @@ fun SignIn(navController: NavHostController, signInViewModel: SignInViewModel) {
     var email by remember { mutableStateOf(TextFieldValue()) }
     var password by remember { mutableStateOf(TextFieldValue()) }
     val signInSuccess = signInViewModel.signInSuccess.collectAsState()
+    var passwordVisible by remember {
+        mutableStateOf(false)
+    }
     val context = LocalContext.current
 
     Box {
@@ -104,7 +108,17 @@ fun SignIn(navController: NavHostController, signInViewModel: SignInViewModel) {
                     value = password,
                     onValueChange = { password = it },
                     labelText = "Enter password",
-                    visualTransformation = PasswordVisualTransformation()
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        Image(painter = if (passwordVisible) painterResource(R.drawable.eye_low_solid) else painterResource(
+                            id = R.drawable.eye_solid
+                        ),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .height(60.dp)
+                                .clickable { passwordVisible = !passwordVisible })
+                    }
+
 
                 )
 

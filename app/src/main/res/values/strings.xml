@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">GameJet</string>
-    <string name="default_error_message">GameJet</string>
+    <string name="error_message">Error Happened</string>
+    <string name="reset_pass_success_message">"Reset password link has been sent to your email"</string>
+
 </resources>

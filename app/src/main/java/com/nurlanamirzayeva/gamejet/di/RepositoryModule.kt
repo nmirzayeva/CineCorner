@@ -2,7 +2,7 @@ package com.nurlanamirzayeva.gamejet.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.nurlanamirzayeva.gamejet.network.repositories.SignUpRepository
+import com.nurlanamirzayeva.gamejet.network.repositories.Repository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,8 +15,8 @@ import javax.inject.Singleton
 object RepositoryModule {
     @Provides
     @Singleton
-    fun provideRepository(auth: FirebaseAuth,fireStore: FirebaseFirestore):SignUpRepository{
-        return SignUpRepository(auth,fireStore)
+    fun provideRepository(auth: FirebaseAuth,fireStore: FirebaseFirestore):Repository{
+        return Repository(auth,fireStore)
     }
 
 

@@ -15,7 +15,7 @@
         android:theme="@style/Theme.GameJet"
         tools:targetApi="31">
         <activity
-            android:name=".view.login.MainActivity"
+            android:name=".view.login.HomeActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.GameJet">

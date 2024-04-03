@@ -1,7 +1,6 @@
 package com.nurlanamirzayeva.gamejet.view.login
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +18,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,39 +31,46 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.CustomOutlinedTextField
+import com.nurlanamirzayeva.gamejet.ui.theme.black
+import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.green
+import com.nurlanamirzayeva.gamejet.ui.theme.sky_blue
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
-import com.nurlanamirzayeva.gamejet.viewmodel.SignInViewModel
+import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
 
 
 @Composable
-fun SignIn(navController: NavHostController, signInViewModel: SignInViewModel) {
+fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
 
     var email by remember { mutableStateOf(TextFieldValue()) }
     var password by remember { mutableStateOf(TextFieldValue()) }
-    val signInSuccess = signInViewModel.signInSuccess.collectAsState()
-    var passwordVisible by remember {
-        mutableStateOf(false)
-    }
+    val signInSuccess = viewModel.signInSuccess.collectAsState()
     val context = LocalContext.current
+    var errorMessage by remember {
+        mutableStateOf<String?>(null)
+    }
+    val isValidEmail = remember(email.text) {
+        derivedStateOf { viewModel.isEmailValid(email.text) }
+    }
+
+    val isValidPassword = remember(password.text) {
+        derivedStateOf { viewModel.isPasswordValid(password.text) }
+    }
+
 
     Box {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(colorResource(id = R.color.dark_grey))
+                .background(color = dark_grey)
                 .verticalScroll(rememberScrollState())
                 .padding(start = 16.dp, end = 16.dp, top = 64.dp, bottom = 30.dp),
 
@@ -92,10 +100,17 @@ fun SignIn(navController: NavHostController, signInViewModel: SignInViewModel) {
 
                 CustomOutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
-                    labelText = "Enter e-mail",
-
-                    )
+                    onValueChange = {
+                        email = it
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = black,
+                        unfocusedContainerColor = black,
+                        unfocusedBorderColor = black,
+                        focusedBorderColor = if (isValidEmail.value) Color.Green else Color.Red,
+                    ),
+                    labelText = "Enter e-mail"
+                )
 
                 Text(
                     "Password",
@@ -107,19 +122,14 @@ fun SignIn(navController: NavHostController, signInViewModel: SignInViewModel) {
                 CustomOutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = black,
+                        unfocusedContainerColor = black,
+                        unfocusedBorderColor = black,
+                        focusedBorderColor = if (isValidPassword.value) Color.Green else Color.Red,
+                    ),
                     labelText = "Enter password",
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        Image(painter = if (passwordVisible) painterResource(R.drawable.eye_low_solid) else painterResource(
-                            id = R.drawable.eye_solid
-                        ),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .height(60.dp)
-                                .clickable { passwordVisible = !passwordVisible })
-                    }
-
-
+                    icEyeVisibility = true
                 )
 
                 Row(
@@ -127,21 +137,44 @@ fun SignIn(navController: NavHostController, signInViewModel: SignInViewModel) {
                         .fillMaxWidth()
                         .padding(vertical = 18.dp), horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Forgot Password?", color = Color.White, fontSize = 16.sp)
+                    Text(
+                        "Forgot Password?",
+                        fontSize = 16.sp,
+                        color = sky_blue,
+                        modifier = Modifier.clickable { navController.navigate(Screens.ResetEmail) })
 
                 }
 
 
                 Button(
                     onClick = {
-                        signInViewModel.signIn(email.text, password.text)
+                        if (viewModel.isEmailValid(email.text) && viewModel.isPasswordValid(password.text)) {
+                            viewModel.signIn(email.text, password.text)
+                        } else if (email.text.isEmpty() || password.text.isEmpty()) {
+
+                            Toast.makeText(
+                                context,
+                                viewModel.errorMessage(email.text, password.text, null),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+
+                            Toast.makeText(
+                                context,
+                                "Incorrect email or password",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                    },
 
 
-                    }, colors = ButtonDefaults.buttonColors(
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = green
                     ), shape = RoundedCornerShape(8.dp), modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
+
 
                 ) {
                     Text(
@@ -160,9 +193,13 @@ fun SignIn(navController: NavHostController, signInViewModel: SignInViewModel) {
                     Text("Don't have an account?  ", color = Color.White, fontSize = 16.sp)
                     Text(
                         "Create an account",
-                        color = colorResource(id = R.color.sky_blue),
+                        color = sky_blue,
                         fontSize = 16.sp,
-                        modifier = Modifier.clickable { navController.navigate(route = Screens.SignUp) })
+                        modifier = Modifier.clickable {
+                            navController.navigate(route = Screens.SignUp) {
+                                popUpTo(Screens.SignUp) { inclusive = true }
+                            }
+                        })
 
 
                 }
@@ -182,17 +219,23 @@ fun SignIn(navController: NavHostController, signInViewModel: SignInViewModel) {
 
             is NetworkState.Success -> {
 
-                navController.navigate(Screens.MainPage)
+
+                navController.navigate(Screens.MainPage) {
+                    viewModel.reset()
+                }
             }
 
 
             is NetworkState.Error -> {
+                errorMessage =
+                    response.errorMessage ?: context.getString(R.string.error_message)
 
                 Toast.makeText(
                     context,
-                    response.errorMessage
-                        ?: context.getString(R.string.default_error_message), Toast.LENGTH_SHORT
+                    errorMessage, Toast.LENGTH_SHORT
                 ).show()
+
+                viewModel.reset()
 
 
             }
@@ -203,3 +246,5 @@ fun SignIn(navController: NavHostController, signInViewModel: SignInViewModel) {
 
     }
 }
+
+

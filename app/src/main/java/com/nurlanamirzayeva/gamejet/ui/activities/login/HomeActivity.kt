@@ -11,14 +11,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.nurlanamirzayeva.gamejet.LoginNavGraph
 import com.nurlanamirzayeva.gamejet.network.repositories.SignInRepository
 import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
-import com.nurlanamirzayeva.gamejet.viewmodel.SignInViewModel
-import com.nurlanamirzayeva.gamejet.viewmodel.SignUpViewModel
+import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class HomeActivity : ComponentActivity() {
     lateinit var navController: NavHostController
 
     @Inject
@@ -28,14 +27,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             navController = rememberNavController()
             GameJetTheme {
-                val signUpViewModel = hiltViewModel<SignUpViewModel>()
+                val viewModel = hiltViewModel<RegisterViewModel>()
 
-                val signInViewModel = SignInViewModel(repository = SignInRepository(auth = auth))
                 Surface {
                     LoginNavGraph(
                         navController = navController,
-                        signUpViewModel = signUpViewModel,
-                        signInViewModel = signInViewModel
+                        viewModel=viewModel
                     )
                 }
             }

@@ -1,4 +1,4 @@
-package com.nurlanamirzayeva.gamejet
+package com.nurlanamirzayeva.gamejet.ui.activities.login
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -29,10 +29,7 @@ fun LoginNavGraph(
 
             SignUp(navController = navController, viewModel=viewModel)
         }
-        composable(route = "MainPage") {
 
-            MainPage(navController = navController)
-        }
 
         composable(route="ResetEmail"){
             
@@ -47,7 +44,6 @@ fun LoginNavGraph(
 object Screens {
     const val SignIn = "SignIn"
     const val SignUp = "SignUp"
-    const val MainPage = "MainPage"
     const val ResetEmail="ResetEmail"
 
 

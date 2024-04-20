@@ -95,18 +95,31 @@ fun ResetEmail(viewModel: RegisterViewModel, navController: NavHostController) {
             CustomOutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                labelText = "Enter e-mail")
+                labelText = "Enter e-mail"
+            )
             Button(
                 onClick = {
 
-                    if(viewModel.isEmailValid(email.text)){
+                    if (viewModel.isEmailValid(email.text)) {
                         viewModel.resetPassword(email.text)
 
+                    } else {
+                        if (email.text.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                R.string.reset_pass_empty_email_error_message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                        } else {
+                            Toast.makeText(
+                                context,
+                                R.string.reset_pass_error_message,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
                     }
-                    else{
-
-                        Toast.makeText(context, "Invalid email", Toast.LENGTH_SHORT).show()}
-
 
 
                 },
@@ -133,10 +146,29 @@ fun ResetEmail(viewModel: RegisterViewModel, navController: NavHostController) {
                     "Resend",
                     color = sky_blue,
                     fontSize = 16.sp,
-                    modifier = Modifier.clickable { if(viewModel.isEmailValid(email.text)){
-                        viewModel.resetPassword(email.text)
+                    modifier = Modifier.clickable {
+                        if (viewModel.isEmailValid(email.text)) {
+                            viewModel.resetPassword(email.text)
 
-                    } }
+                        } else {
+                            if (email.text.isEmpty()) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.reset_pass_empty_email_error_message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    R.string.reset_pass_error_message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                        }
+
+                    }
                 )
 
 

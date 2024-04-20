@@ -98,10 +98,24 @@ class RegisterViewModel @Inject constructor(private val repository: Repository) 
             message = "Please fill out password field"
             return message
         }
-        if (confirmPassword!!.isEmpty()) {
+        confirmPassword?.let {
+            if (it.isEmpty()) {
 
-            message = "Please confirm the password "
+                message = "Please confirm the password "
+                return message
+            }
+        }
+
+
+        if (!isEmailValid(email)){
+            message = "Incorrect email"
             return message
+        }
+
+        if(!isPasswordValid(password)){
+            message="Incorrect password"
+            return message
+
         }
 
         return message

@@ -1,5 +1,7 @@
 package com.nurlanamirzayeva.gamejet.view.login
 
+import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,7 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.nurlanamirzayeva.gamejet.R
-import com.nurlanamirzayeva.gamejet.Screens
+import com.nurlanamirzayeva.gamejet.ui.activities.login.Screens
+import com.nurlanamirzayeva.gamejet.ui.activities.mainpage.MainPageActivity
 import com.nurlanamirzayeva.gamejet.ui.components.CustomOutlinedTextField
 import com.nurlanamirzayeva.gamejet.ui.theme.black
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
@@ -148,22 +151,18 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
 
                 Button(
                     onClick = {
-                        if (viewModel.isEmailValid(email.text) && viewModel.isPasswordValid(password.text)) {
-                            viewModel.signIn(email.text, password.text)
-                        } else if (email.text.isEmpty() || password.text.isEmpty()) {
 
+                        viewModel.errorMessage(email.text, password.text, null)?.let {
                             Toast.makeText(
                                 context,
                                 viewModel.errorMessage(email.text, password.text, null),
                                 Toast.LENGTH_SHORT
                             ).show()
-                        } else {
+                        } ?: run {
 
-                            Toast.makeText(
-                                context,
-                                "Incorrect email or password",
-                                Toast.LENGTH_SHORT
-                            ).show()
+
+                            viewModel.signIn(email.text, password.text)
+
                         }
 
                     },
@@ -219,10 +218,7 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
 
             is NetworkState.Success -> {
 
-
-                navController.navigate(Screens.MainPage) {
-                    viewModel.reset()
-                }
+                context.startActivity(Intent(context,MainPageActivity::class.java))
             }
 
 
@@ -245,6 +241,7 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
         }
 
     }
+
 }
 
 

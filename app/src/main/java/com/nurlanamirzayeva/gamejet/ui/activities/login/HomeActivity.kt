@@ -8,8 +8,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
-import com.nurlanamirzayeva.gamejet.LoginNavGraph
-import com.nurlanamirzayeva.gamejet.network.repositories.SignInRepository
+import com.nurlanamirzayeva.gamejet.ui.activities.login.LoginNavGraph
 import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
 import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
 import dagger.hilt.android.AndroidEntryPoint

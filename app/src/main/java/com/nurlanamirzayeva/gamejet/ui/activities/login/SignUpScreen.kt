@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.nurlanamirzayeva.gamejet.Screens
+import com.nurlanamirzayeva.gamejet.ui.activities.login.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.CustomOutlinedTextField
 import com.nurlanamirzayeva.gamejet.ui.theme.black
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
@@ -249,8 +249,11 @@ fun SignUp(navController: NavHostController, viewModel: RegisterViewModel = hilt
 
             Button(
                 onClick = {
-
-                    if (viewModel.isEmailValid(email.text) && viewModel.isPasswordValid(password.text)) {
+                    viewModel.errorMessage(email.text, password.text, confirmPassword.text)?.let {
+                        // show error toast
+                        Toast.makeText(context, viewModel.errorMessage(email.text,password.text,confirmPassword.text), Toast.LENGTH_SHORT).show()
+                    } ?: run {
+                        // perform the task
                         viewModel.signUp(
                             context, userMap = hashMapOf(
                                 EMAIL to email.text,
@@ -259,28 +262,8 @@ fun SignUp(navController: NavHostController, viewModel: RegisterViewModel = hilt
                                 USERNAME to username.text
                             )
                         )
-
-                    } else if (email.text.isEmpty() || password.text.isEmpty() || confirmPassword.text.isEmpty()) {
-
-                        Toast.makeText(
-                            context,
-                            viewModel.errorMessage(email.text, password.text, confirmPassword.text),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } else {
-                        if (confirmPassword.text != password.text) {
-                            Toast.makeText(context, "Password doesn't match", Toast.LENGTH_SHORT)
-                                .show()
-
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "Incorrect email or password",
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
-                        }
                     }
+
 
                 }, colors = ButtonDefaults.buttonColors(
                     containerColor = green

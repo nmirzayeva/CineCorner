@@ -7,14 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.nurlanamirzayeva.gamejet.Paging.MoviesPagingSource
+import com.nurlanamirzayeva.gamejet.paging.DiscoverPagingSource
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
-import com.nurlanamirzayeva.gamejet.model.ResultsItem
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
+import com.nurlanamirzayeva.gamejet.paging.TrendingPagingSource
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -23,8 +21,15 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
 
     private val _movieListResponse: MutableStateFlow<DiscoverResponse?> =
         MutableStateFlow(null)
-
     val movieListResponse = _movieListResponse.asStateFlow()
+
+    private val _trendingMovieResponse: MutableStateFlow<DiscoverResponse?> = MutableStateFlow(null)
+    val trendingMovieResponse = _trendingMovieResponse.asStateFlow()
+
+
+    val firstDiscoverImage = mutableStateOf("")
+
+    val firstTrendingImage = mutableStateOf("")
 
 
     var errorMessage: String by mutableStateOf("")
@@ -42,6 +47,12 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
                     if (it.isSuccessful) {
 
                         _movieListResponse.value = it.body()
+
+                        if (firstDiscoverImage.value.isEmpty()) {
+                            firstDiscoverImage.value =
+                                it.body()?.results!![2].backdropPath.toString()
+
+                        }
                     }
 
                 }
@@ -65,10 +76,13 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
 
 
             try {
-                mainPageRepository.getTrendingNow().also {
+                mainPageRepository.getTrendingNow(page = 1).also {
                     if (it.isSuccessful) {
-                        _movieListResponse.value = it.body()
+                        _trendingMovieResponse.value = it.body()
+                        if(firstTrendingImage.value.isEmpty()){
 
+                            firstTrendingImage.value=it.body()?.results!![2].backdropPath.toString()
+                        }
 
                     }
 
@@ -84,19 +98,26 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
 
     }
 
-    val movieListPager = Pager(
 
-        config = PagingConfig(pageSize = 5),
-        initialKey = 0,
+    val discoverListPager = Pager(
+
+        config = PagingConfig(pageSize = 20),
+        initialKey = 1,
         pagingSourceFactory = {
-            MoviesPagingSource(
+            DiscoverPagingSource(
                 mainPageRepository
             )
-
-
         }
 
     ).flow.cachedIn(viewModelScope)
 
+
+    val trendingListPager = Pager(
+        config = PagingConfig(pageSize = 20),
+        initialKey = 1,
+        pagingSourceFactory = {
+            TrendingPagingSource(mainPageRepository)
+        }
+    ).flow.cachedIn(viewModelScope)
 
 }

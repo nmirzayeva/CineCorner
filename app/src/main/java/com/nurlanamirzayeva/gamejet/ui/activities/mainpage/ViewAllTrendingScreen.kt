@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,9 +37,9 @@ import com.nurlanamirzayeva.gamejet.utils.IMAGE_URL
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 
 @Composable
-fun ViewAllDiscoverScreen(mainPageViewModel: MainPageViewModel) {
+fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel) {
 
-    val discoverPageList = mainPageViewModel.discoverListPager.collectAsLazyPagingItems()
+    val trendingPageList = mainPageViewModel.trendingListPager.collectAsLazyPagingItems()
     val context = LocalContext.current
 
 
@@ -50,11 +52,20 @@ fun ViewAllDiscoverScreen(mainPageViewModel: MainPageViewModel) {
                 .fillMaxWidth()
                 .background(color = grey)
                 .height(100.dp)
-        ){
+        ) {
 
 
-            Text(text ="List",color=Color.White, fontSize = 30.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.align(
-                Alignment.CenterStart).padding(start = 50.dp))
+            Text(
+                text = "List",
+                color = Color.White,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .align(
+                        Alignment.CenterStart
+                    )
+                    .padding(start = 50.dp)
+            )
         }
 
 
@@ -73,7 +84,12 @@ fun ViewAllDiscoverScreen(mainPageViewModel: MainPageViewModel) {
                     .background(color = black)
                     .height(230.dp)
             ) {
-                AsyncImage(model = BACKGROUND_URL+mainPageViewModel.firstDiscoverImage.value, contentDescription = null, modifier = Modifier.fillMaxWidth(), contentScale = ContentScale.FillBounds )
+                AsyncImage(
+                    model = BACKGROUND_URL + mainPageViewModel.firstTrendingImage.value,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.FillBounds
+                )
 
             }
 
@@ -87,7 +103,7 @@ fun ViewAllDiscoverScreen(mainPageViewModel: MainPageViewModel) {
 
 
 
-            if (discoverPageList.itemSnapshotList.items.isNotEmpty()) {
+            if (trendingPageList.itemSnapshotList.items.isNotEmpty()) {
 
                 LazyVerticalGrid(columns = GridCells.Fixed(4),
                     modifier = Modifier
@@ -100,11 +116,11 @@ fun ViewAllDiscoverScreen(mainPageViewModel: MainPageViewModel) {
 
                     content = {
 
-                        items(discoverPageList.itemCount) { index ->
-                            DiscoverItem(imageUrl = IMAGE_URL + discoverPageList[index]!!.posterPath)
+                        items(trendingPageList.itemCount) { index ->
+                            TrendingItem(imageUrl = IMAGE_URL + trendingPageList[index]!!.posterPath)
                         }
 
-                        with(discoverPageList)
+                        with(trendingPageList)
 
                         {
                             when {
@@ -118,6 +134,8 @@ fun ViewAllDiscoverScreen(mainPageViewModel: MainPageViewModel) {
                                             color = Color.White
                                         )
                                     }
+
+
                                 }
 
                                 loadState.refresh is LoadState.Error -> {
@@ -142,26 +160,17 @@ fun ViewAllDiscoverScreen(mainPageViewModel: MainPageViewModel) {
                                 loadState.append is LoadState.Error -> {
                                     Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
                                 }
-
                             }
 
-
                         }
-
-
                     })
-
             }
-
         }
-
     }
-
 }
 
-
 @Composable
-fun DiscoverItem(imageUrl: String) {
+fun TrendingItem(imageUrl: String) {
 
 
     Box(
@@ -173,7 +182,6 @@ fun DiscoverItem(imageUrl: String) {
 
         AsyncImage(
             model = imageUrl, contentDescription = null, modifier = Modifier
-
                 .fillMaxWidth(),
             contentScale = ContentScale.FillBounds
         )

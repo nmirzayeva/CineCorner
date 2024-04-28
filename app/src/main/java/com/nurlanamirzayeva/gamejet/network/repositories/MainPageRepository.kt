@@ -9,6 +9,6 @@ import retrofit2.Response
 class MainPageRepository(private val apiService: ApiService) {
 
     suspend fun getMovies(page:Int): Response<DiscoverResponse> = apiService.getMoviesByPage(page)
-    suspend fun getTrendingNow():Response<DiscoverResponse> =apiService.getTrendingNow()
+    suspend fun getTrendingNow(page:Int):Response<DiscoverResponse> =apiService.getTrendingNow(page)
 
 }

@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
@@ -60,17 +63,11 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
         mainPageViewModel.getTrendingNow()
     }
 
-    Box(
-        modifier = Modifier
-
-            .fillMaxSize()
-            .background(color = dark_grey)
-            .padding(start = 14.dp, end = 14.dp, top = 16.dp)
-    ) {
-
-
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = dark_grey)
+                .padding(horizontal = 14.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
 
@@ -98,7 +95,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-
+                contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
 
                 moviesState.value?.results?.let {
@@ -155,11 +152,15 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
             }
 
 
+
         }
+
 
     }
 
-}
+
+
+
 
 
 @Composable

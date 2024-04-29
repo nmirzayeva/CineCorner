@@ -38,6 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.network.ApiClient
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
+import com.nurlanamirzayeva.gamejet.ui.activities.login.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.BottomBarTabs
 import com.nurlanamirzayeva.gamejet.ui.components.BottomNavItems
 import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
@@ -69,7 +70,7 @@ class MainPageActivity : ComponentActivity() {
 
                     Box(
                         modifier = Modifier
-                            .padding(vertical = 24.dp, horizontal = 64.dp)
+                            .padding(horizontal = 4.dp, vertical = 8.dp)
                             .fillMaxWidth()
                             .height(64.dp)
                             .hazeChild(state = hazeState, shape = CircleShape)
@@ -92,7 +93,9 @@ class MainPageActivity : ComponentActivity() {
                                 if (selectedTabIndex==BottomNavItems.entries.indexOf(item))
                                     return@BottomBarTabs
                                 selectedTabIndex = BottomNavItems.entries.indexOf(item)
-                                navController.navigate(item.route)
+                                navController.navigate(item.route){
+                                    popUpTo(item.route) { inclusive = true }
+                                }
 
                             }
                         )

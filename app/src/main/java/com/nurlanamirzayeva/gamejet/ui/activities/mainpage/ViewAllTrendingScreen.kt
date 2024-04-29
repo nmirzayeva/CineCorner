@@ -42,7 +42,6 @@ fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel) {
     val trendingPageList = mainPageViewModel.trendingListPager.collectAsLazyPagingItems()
     val context = LocalContext.current
 
-
     Column(
         modifier = Modifier
             .fillMaxSize()

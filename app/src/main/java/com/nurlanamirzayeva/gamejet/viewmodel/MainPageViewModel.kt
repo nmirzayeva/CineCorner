@@ -50,7 +50,7 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
 
                         if (firstDiscoverImage.value.isEmpty()) {
                             firstDiscoverImage.value =
-                                it.body()?.results!![2].backdropPath.toString()
+                                it.body()?.results!![1].backdropPath.toString()
 
                         }
                     }
@@ -60,13 +60,11 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
 
             } catch (e: Exception) {
 
-
                 errorMessage = e.message.toString()
             }
 
 
         }
-
 
     }
 
@@ -74,14 +72,13 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
 
         viewModelScope.launch(Dispatchers.IO) {
 
-
             try {
                 mainPageRepository.getTrendingNow(page = 1).also {
                     if (it.isSuccessful) {
                         _trendingMovieResponse.value = it.body()
                         if(firstTrendingImage.value.isEmpty()){
 
-                            firstTrendingImage.value=it.body()?.results!![2].backdropPath.toString()
+                            firstTrendingImage.value=it.body()?.results!![1].backdropPath.toString()
                         }
 
                     }

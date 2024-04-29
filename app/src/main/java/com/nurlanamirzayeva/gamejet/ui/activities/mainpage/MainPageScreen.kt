@@ -1,5 +1,6 @@
 package com.nurlanamirzayeva.gamejet.view.mainpage
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,9 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -32,6 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,6 +46,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.ui.activities.mainpage.MainPageNavGraph
 import com.nurlanamirzayeva.gamejet.ui.activities.mainpage.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.BottomNavItems
@@ -71,10 +78,23 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
 
+Row(modifier = Modifier.fillMaxWidth()) {
+    Image(
+        painter = painterResource(id = R.drawable.pp),
+        contentDescription = "Profile",
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .padding()
+            .size(56.dp)
+            .clip(
+                CircleShape
+            )
 
-            Text("Films", fontSize = 30.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
+    )
+    Text("Hello, Johnny",color= Color.White, fontSize = 24.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(start = 24.dp, top = 6.dp))
+}
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
 
                 ) {
@@ -82,7 +102,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                     "Discover",
                     fontSize = 30.sp,
                     color = Color.White,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
 
                 Text(
@@ -157,11 +177,6 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
 
     }
-
-
-
-
-
 
 @Composable
 fun SpecialOfferItems(imageUrl: String) {

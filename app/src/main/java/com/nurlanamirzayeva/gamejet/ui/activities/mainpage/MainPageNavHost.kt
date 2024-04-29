@@ -32,12 +32,16 @@ fun MainPageNavGraph(
 
             ViewAllTrendingScreen(mainPageViewModel = mainPageViewModel)
         }
+        composable(route=Screens.Profile){
+            ProfileScreen()
+        }
 
     }
 }
 
 object Screens {
-    const val MainPage = "MainPage"
+    const val MainPage ="MainPage"
+    const val Profile= "Profile"
     const val ViewAllDiscover = "ViewAllDiscover"
     const val ViewAllTrending = "ViewAllTrending"
 }

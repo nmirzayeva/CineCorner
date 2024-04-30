@@ -35,6 +35,9 @@ fun MainPageNavGraph(
         composable(route=Screens.Profile){
             ProfileScreen()
         }
+        composable(route=Screens.Discover){
+            DetailScreen()
+        }
 
     }
 }
@@ -44,6 +47,7 @@ object Screens {
     const val Profile= "Profile"
     const val ViewAllDiscover = "ViewAllDiscover"
     const val ViewAllTrending = "ViewAllTrending"
+    const val Discover="Discover"
 }
 
 

@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.KeyboardArrowRight
@@ -46,6 +48,7 @@ fun ProfileScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(color = dark_grey)
+            .verticalScroll(rememberScrollState())
     ) {
         Text(
             "Profile",
@@ -58,7 +61,7 @@ fun ProfileScreen() {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 18.dp,)
+                .padding(horizontal = 18.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.pp),
@@ -110,13 +113,9 @@ fun ProfileScreen() {
             modifier = Modifier.padding(start = 14.dp, top = 40.dp)
         )
 
-        LazyColumn {
+        accountSettingItems.forEach { accountSettingItem ->
 
-            items(accountSettingItems) { accountItems ->
-                ProfileItem(text = accountItems)
-
-            }
-
+            ProfileItem(text = accountSettingItem)
         }
 
         Text(
@@ -127,12 +126,8 @@ fun ProfileScreen() {
             modifier = Modifier.padding(start = 14.dp, top = 24.dp)
         )
 
-        LazyColumn {
-
-            items(helpAndSupportAccounts) { helpItems ->
-                ProfileItem(text = helpItems)
-
-            }
+        helpAndSupportAccounts.forEach { helpAndSupportAccountItem ->
+            ProfileItem(text = helpAndSupportAccountItem)
 
         }
         Text(
@@ -140,7 +135,7 @@ fun ProfileScreen() {
             color = Color.Red,
             fontWeight = FontWeight.SemiBold,
             fontSize = 24.sp,
-            modifier = Modifier.padding(start = 14.dp,top=10.dp)
+            modifier = Modifier.padding(start = 14.dp, top = 10.dp, bottom = 80.dp )
         )
 
     }

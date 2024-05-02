@@ -8,8 +8,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.paging.DiscoverPagingSource
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
+import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
 import com.nurlanamirzayeva.gamejet.paging.TrendingPagingSource
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +19,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class MainPageViewModel(private val mainPageRepository: MainPageRepository) : ViewModel() {
+class MainPageViewModel(
+    private val mainPageRepository: MainPageRepository,
+    private val detailPageRepository: DetailPageRepository
+) : ViewModel() {
 
     private val _movieListResponse: MutableStateFlow<DiscoverResponse?> =
         MutableStateFlow(null)
@@ -26,13 +31,17 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
     private val _trendingMovieResponse: MutableStateFlow<DiscoverResponse?> = MutableStateFlow(null)
     val trendingMovieResponse = _trendingMovieResponse.asStateFlow()
 
+    private val _detailPageResponse: MutableStateFlow<DetailsResponse?> = MutableStateFlow(null)
+    val detailPageResponse = _detailPageResponse.asStateFlow()
+
 
     val firstDiscoverImage = mutableStateOf("")
 
     val firstTrendingImage = mutableStateOf("")
 
-
     var errorMessage: String by mutableStateOf("")
+
+    var id= 0
 
 
     fun getMovieList() {
@@ -57,12 +66,10 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
 
                 }
 
-
             } catch (e: Exception) {
 
                 errorMessage = e.message.toString()
             }
-
 
         }
 
@@ -76,14 +83,12 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
                 mainPageRepository.getTrendingNow(page = 1).also {
                     if (it.isSuccessful) {
                         _trendingMovieResponse.value = it.body()
-                        if(firstTrendingImage.value.isEmpty()){
-
-                            firstTrendingImage.value=it.body()?.results!![1].backdropPath.toString()
+                        if (firstTrendingImage.value.isEmpty()) {
+                            firstTrendingImage.value =
+                                it.body()?.results!![1].backdropPath.toString()
                         }
 
                     }
-
-
                 }
             } catch (e: Exception) {
 
@@ -91,7 +96,21 @@ class MainPageViewModel(private val mainPageRepository: MainPageRepository) : Vi
             }
 
         }
+    }
 
+    fun getDetails() {
+        viewModelScope.launch(Dispatchers.IO) {
+
+            try {
+            val detailList= detailPageRepository.getDetails(movieId=940721)
+                _detailPageResponse.value=detailList.body()
+
+            }
+            catch (e:Exception){
+                errorMessage= e.message.toString()
+            }
+
+        }
 
     }
 

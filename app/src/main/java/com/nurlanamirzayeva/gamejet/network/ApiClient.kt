@@ -26,8 +26,6 @@ object ApiClient {
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build().create(ApiService::class.java)
-
-
         }
 
         return apiService!!

@@ -46,7 +46,6 @@ fun ContentDrawScope.drawWithLayer(block:ContentDrawScope.()->Unit){
         restoreToCount(checkPoint)
     }
 
-
 }
 @Composable
 fun TextSwitch (
@@ -70,21 +69,12 @@ BoxWithConstraints(
 
         val indicatorOffset by animateDpAsState(
             targetValue = tabWidth*selectedIndex,
-            animationSpec = tween(durationMillis =250, easing = FastOutSlowInEasing ),
+            animationSpec = tween(durationMillis =250, easing = FastOutSlowInEasing),
             label="indicator offset"
         )
 
-        // This is for shadow layer matching white background
-        Box(
-            modifier= Modifier
-                .offset(x = indicatorOffset)
-                .shadow(4.dp, RoundedCornerShape(8.dp))
-                .width(tabWidth)
-                .fillMaxWidth()
-        )
       Row(modifier= Modifier
           .fillMaxWidth()
-
           .drawWithContent {
               val padding = 8.dp.toPx()
               drawRoundRect(

@@ -36,7 +36,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.nurlanamirzayeva.gamejet.R
+import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.network.ApiClient
+import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
 import com.nurlanamirzayeva.gamejet.ui.activities.login.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.BottomBarTabs
@@ -61,8 +63,11 @@ class MainPageActivity : ComponentActivity() {
             GameJetTheme {
 
                 val mainPageViewModel =
-                    MainPageViewModel(MainPageRepository(ApiClient.getInstance()))
+                    MainPageViewModel(MainPageRepository(ApiClient.getInstance()),
+                        DetailPageRepository(ApiClient.getInstance())
+                    )
                 val navBackEntry by navController.currentBackStackEntryAsState()
+               val detail=DetailsResponse()
                 val currentRoute = navBackEntry?.destination?.route
                 var selectedTabIndex by remember { mutableIntStateOf(1) }
                 val hazeState = remember { HazeState() }
@@ -151,7 +156,7 @@ class MainPageActivity : ComponentActivity() {
                             .fillMaxSize(),
                     ) {
                         MainPageNavGraph(
-                            navController = navController, mainPageViewModel = mainPageViewModel
+                            navController = navController, mainPageViewModel = mainPageViewModel, detail =detail
                         )
                     }
                 }

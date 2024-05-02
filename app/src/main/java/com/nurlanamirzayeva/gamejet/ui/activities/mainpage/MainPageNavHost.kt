@@ -8,13 +8,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.view.mainpage.MainPage
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
+import retrofit2.Response
 
 @Composable
 fun MainPageNavGraph(
     navController: NavHostController,
-    mainPageViewModel: MainPageViewModel
+    mainPageViewModel: MainPageViewModel,
+    detail: DetailsResponse
 ) {
 
     NavHost(navController = navController, startDestination = Screens.MainPage) {
@@ -35,8 +38,8 @@ fun MainPageNavGraph(
         composable(route=Screens.Profile){
             ProfileScreen()
         }
-        composable(route=Screens.Discover){
-            DetailScreen()
+        composable(route=Screens.Detail){
+            DetailScreen(mainPageViewModel=mainPageViewModel, detail = detail)
         }
 
     }
@@ -47,7 +50,7 @@ object Screens {
     const val Profile= "Profile"
     const val ViewAllDiscover = "ViewAllDiscover"
     const val ViewAllTrending = "ViewAllTrending"
-    const val Discover="Discover"
+    const val Detail="Detail"
 }
 
 

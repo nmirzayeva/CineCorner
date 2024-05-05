@@ -1,5 +1,6 @@
 package com.nurlanamirzayeva.gamejet.view.mainpage
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -116,10 +117,12 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                 items(items = it) { movie ->
 
                     SpecialOfferItems(imageUrl = IMAGE_URL + movie.posterPath, onClick = {
-                        movie.id?.let { it ->
-                            mainPageViewModel.id = it
+                        Log.d("TAG", "MainPage:${movie.id} ")
+                        movie.id?.let { movieId ->
+                            mainPageViewModel.movieId.intValue = movieId
+                            navController.navigate(Screens.Detail)
                         }
-                        navController.navigate(Screens.Detail)
+
                     })
 
                 }
@@ -162,8 +165,8 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                 items(items = it) { movie ->
 
                     SpecialOfferItems(imageUrl = IMAGE_URL + movie.posterPath, onClick = {
-                        movie.id?.let { it ->
-                            mainPageViewModel.id = it
+                        movie.id?.let { movieId->
+                            mainPageViewModel.movieId.intValue = movieId
                         }
                         navController.navigate(route = Screens.Detail)
                     })

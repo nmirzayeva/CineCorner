@@ -32,9 +32,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.network.ApiClient
@@ -46,14 +48,17 @@ import com.nurlanamirzayeva.gamejet.ui.components.BottomNavItems
 import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 
+@AndroidEntryPoint
 class MainPageActivity : ComponentActivity() {
 
     lateinit var navController: NavHostController
 
+    lateinit var auth:FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -62,12 +67,8 @@ class MainPageActivity : ComponentActivity() {
             navController = rememberNavController()
             GameJetTheme {
 
-                val mainPageViewModel =
-                    MainPageViewModel(MainPageRepository(ApiClient.getInstance()),
-                        DetailPageRepository(ApiClient.getInstance())
-                    )
+                val mainPageViewModel = hiltViewModel<MainPageViewModel>()
                 val navBackEntry by navController.currentBackStackEntryAsState()
-               val detail=DetailsResponse()
                 val currentRoute = navBackEntry?.destination?.route
                 var selectedTabIndex by remember { mutableIntStateOf(1) }
                 val hazeState = remember { HazeState() }
@@ -156,7 +157,7 @@ class MainPageActivity : ComponentActivity() {
                             .fillMaxSize(),
                     ) {
                         MainPageNavGraph(
-                            navController = navController, mainPageViewModel = mainPageViewModel, detail =detail
+                            navController = navController, mainPageViewModel = mainPageViewModel
                         )
                     }
                 }

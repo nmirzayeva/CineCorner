@@ -17,7 +17,6 @@ import retrofit2.Response
 fun MainPageNavGraph(
     navController: NavHostController,
     mainPageViewModel: MainPageViewModel,
-    detail: DetailsResponse
 ) {
 
     NavHost(navController = navController, startDestination = Screens.MainPage) {
@@ -39,7 +38,7 @@ fun MainPageNavGraph(
             ProfileScreen()
         }
         composable(route=Screens.Detail){
-            DetailScreen(mainPageViewModel=mainPageViewModel, detail = detail)
+            DetailScreen(mainPageViewModel=mainPageViewModel)
         }
 
     }

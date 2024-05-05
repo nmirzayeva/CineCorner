@@ -20,7 +20,6 @@ object ApiClient {
             val client: OkHttpClient = OkHttpClient.Builder().addInterceptor(interceptor).build()
 
 
-
             apiService = Retrofit.Builder()
                 .baseUrl(BuildConfig.BASE_URL)
                 .client(client)

@@ -1,7 +1,9 @@
 package com.nurlanamirzayeva.gamejet.network
 
+import com.nurlanamirzayeva.gamejet.model.CreditsResponse
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
+import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.utils.API_KEY
 import retrofit2.Response
 import retrofit2.http.GET
@@ -19,4 +21,15 @@ interface ApiService {
    suspend fun getDetails(
       @Path("movie_id") movieId:Int
    ):Response<DetailsResponse>
+
+   @GET("movie/{movie_id}/videos?api_key=$API_KEY")
+   suspend fun getVideos(
+      @Path("movie_id") movieId: Int
+   ):Response<Videos>
+
+   @GET("movie/{movie_id}/credits?api_key=$API_KEY")
+   suspend fun getCredits(
+      @Path("movie_id") movieId: Int
+   ):Response<CreditsResponse>
+
 }

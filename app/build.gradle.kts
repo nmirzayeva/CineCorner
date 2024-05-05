@@ -139,6 +139,9 @@ dependencies {
 
     implementation("dev.chrisbanes.haze:haze-jetpack-compose:0.4.1")
 
+    implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+
+
     //Tests
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

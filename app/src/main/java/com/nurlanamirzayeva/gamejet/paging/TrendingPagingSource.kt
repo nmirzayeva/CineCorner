@@ -4,8 +4,9 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.nurlanamirzayeva.gamejet.model.ResultsItem
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
+import javax.inject.Inject
 
-class TrendingPagingSource(private val mainPageRepository: MainPageRepository) :
+class TrendingPagingSource @Inject constructor(private val mainPageRepository: MainPageRepository) :
     PagingSource<Int, ResultsItem>() {
     override fun getRefreshKey(state: PagingState<Int, ResultsItem>): Int? {
         return state.anchorPosition

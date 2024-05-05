@@ -1,6 +1,10 @@
 package com.nurlanamirzayeva.gamejet.viewmodel
 
+import android.provider.MediaStore.Video
+import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -8,18 +12,25 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import androidx.paging.log
+import com.nurlanamirzayeva.gamejet.model.CreditsResponse
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.paging.DiscoverPagingSource
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
+import com.nurlanamirzayeva.gamejet.model.ResultsVideoItem
+import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
 import com.nurlanamirzayeva.gamejet.paging.TrendingPagingSource
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainPageViewModel(
+@HiltViewModel
+class MainPageViewModel @Inject constructor(
     private val mainPageRepository: MainPageRepository,
     private val detailPageRepository: DetailPageRepository
 ) : ViewModel() {
@@ -34,6 +45,12 @@ class MainPageViewModel(
     private val _detailPageResponse: MutableStateFlow<DetailsResponse?> = MutableStateFlow(null)
     val detailPageResponse = _detailPageResponse.asStateFlow()
 
+    private val _videoListResponse:MutableStateFlow<Videos?> = MutableStateFlow(null)
+    val videoListResponse= _videoListResponse.asStateFlow()
+
+    private val _creditListResponse:MutableStateFlow<CreditsResponse?> = MutableStateFlow(null)
+    val creditListResponse=_creditListResponse.asStateFlow()
+
 
     val firstDiscoverImage = mutableStateOf("")
 
@@ -41,7 +58,8 @@ class MainPageViewModel(
 
     var errorMessage: String by mutableStateOf("")
 
-    var id= 0
+    var movieId = mutableIntStateOf(0 )
+
 
 
     fun getMovieList() {
@@ -102,7 +120,7 @@ class MainPageViewModel(
         viewModelScope.launch(Dispatchers.IO) {
 
             try {
-            val detailList= detailPageRepository.getDetails(movieId=940721)
+            val detailList= detailPageRepository.getDetails(movieId.intValue)
                 _detailPageResponse.value=detailList.body()
 
             }
@@ -113,6 +131,36 @@ class MainPageViewModel(
         }
 
     }
+
+
+    fun getVideos(){
+        viewModelScope.launch(Dispatchers.IO) {
+
+            try {
+                val videoItems = detailPageRepository.getVideos(movieId.intValue)
+                _videoListResponse.value= videoItems.body()
+            }
+            catch (e:Exception){
+                errorMessage=e.message.toString()
+            }
+        }
+
+    }
+
+    fun getCredits(){
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val creditItems= detailPageRepository.getCredits(movieId.intValue)
+                _creditListResponse.value=creditItems.body()
+            }
+            catch(e:Exception){
+                errorMessage=e.message.toString()
+            }
+        }
+    }
+
+
 
 
     val discoverListPager = Pager(

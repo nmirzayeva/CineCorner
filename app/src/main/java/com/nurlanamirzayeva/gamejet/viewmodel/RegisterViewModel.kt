@@ -65,7 +65,6 @@ class RegisterViewModel @Inject constructor(private val repository: Repository) 
 
         }
 
-
     }
 
     fun resetPassword(email: String) {
@@ -107,13 +106,13 @@ class RegisterViewModel @Inject constructor(private val repository: Repository) 
         }
 
 
-        if (!isEmailValid(email)){
+        if (!isEmailValid(email)) {
             message = "Incorrect email"
             return message
         }
 
-        if(!isPasswordValid(password)){
-            message="Incorrect password"
+        if (!isPasswordValid(password)) {
+            message = "Incorrect password"
             return message
 
         }

@@ -22,6 +22,7 @@ import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
 import com.nurlanamirzayeva.gamejet.paging.TrendingPagingSource
+import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,7 +46,7 @@ class MainPageViewModel @Inject constructor(
     private val _detailPageResponse: MutableStateFlow<DetailsResponse?> = MutableStateFlow(null)
     val detailPageResponse = _detailPageResponse.asStateFlow()
 
-    private val _videoListResponse:MutableStateFlow<Videos?> = MutableStateFlow(null)
+    private val _videoListResponse:MutableStateFlow<NetworkState<Videos>?> = MutableStateFlow(null)
     val videoListResponse= _videoListResponse.asStateFlow()
 
     private val _creditListResponse:MutableStateFlow<CreditsResponse?> = MutableStateFlow(null)
@@ -136,12 +137,17 @@ class MainPageViewModel @Inject constructor(
     fun getVideos(){
         viewModelScope.launch(Dispatchers.IO) {
 
+            _videoListResponse.value = NetworkState.Loading()
             try {
                 val videoItems = detailPageRepository.getVideos(movieId.intValue)
-                _videoListResponse.value= videoItems.body()
+                videoItems.body()?.let {
+                    _videoListResponse.value= NetworkState.Success(data = it)
+                }
+
             }
             catch (e:Exception){
                 errorMessage=e.message.toString()
+                _videoListResponse.value=NetworkState.Error(errorMessage = errorMessage)
             }
         }
 

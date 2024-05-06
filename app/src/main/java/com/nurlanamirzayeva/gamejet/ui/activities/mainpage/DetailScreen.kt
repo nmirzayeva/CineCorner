@@ -20,15 +20,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -43,10 +46,12 @@ import androidx.lifecycle.LifecycleOwner
 import coil.compose.AsyncImage
 import com.google.android.play.integrity.internal.i
 import com.nurlanamirzayeva.gamejet.R
+import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.ui.components.TextSwitch
 import com.nurlanamirzayeva.gamejet.ui.theme.black
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.utils.IMAGE_URL
+import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
@@ -57,7 +62,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 fun DetailScreen(mainPageViewModel: MainPageViewModel) {
     val detailItemState = mainPageViewModel.detailPageResponse.collectAsState()
     val videoItemState = mainPageViewModel.videoListResponse.collectAsState()
-    val creditItemState =mainPageViewModel.creditListResponse.collectAsState()
+    val creditItemState = mainPageViewModel.creditListResponse.collectAsState()
 
     LaunchedEffect(key1 = mainPageViewModel.movieId.intValue) {
         mainPageViewModel.getDetails()
@@ -67,13 +72,6 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
 
     detailItemState.value?.let {
         val tabItems = remember { listOf("Actors", "Similar Movies") }
-        val videoItems = videoItemState.value?.results ?: emptyList()
-
-        val teaserVideo = videoItems.find { video ->
-            video?.type == "Trailer"
-        }
-
-        val teaserVideoKey=teaserVideo?.key?:""
 
         var selectedIndex by remember {
             mutableIntStateOf(0)
@@ -89,15 +87,32 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
                 .verticalScroll(rememberScrollState())
         ) {
 
-            Box()
-            {
-                if(teaserVideoKey.isNotEmpty()) {
-                    YouTubePlayer(
-                        youtubeVideoId = teaserVideoKey,
-                        lifeCycleOwner = LocalLifecycleOwner.current
-                    )
+            Box {
 
+                when(videoItemState.value) {
+                    is NetworkState.Loading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Center))
+                    }
+
+                    is NetworkState.Success -> {
+                        val videoItem = (videoItemState.value as NetworkState.Success<Videos>).data.results?.find { video ->
+                            video?.type == "Trailer"
+                        }?.key ?: ""
+                        if (videoItem.isNotEmpty()) {
+                            YouTubePlayer(
+                                youtubeVideoId = videoItem,
+                                lifeCycleOwner = LocalLifecycleOwner.current
+                            )
+                        }
+                    }
+
+                    is NetworkState.Error -> {
+
+                    }
+
+                    else -> {}
                 }
+
 
                 Row(
                     modifier = Modifier
@@ -248,9 +263,9 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.padding(start = 14.dp, top = 14.dp)
             ) {
-                creditItemState.value?.cast?.let {creditItem->
-                    items(items = creditItem) {credit->
-                        ActorsItem(image = IMAGE_URL+ credit!!.profilePath )
+                creditItemState.value?.cast?.let { creditItem ->
+                    items(items = creditItem) { credit ->
+                        ActorsItem(image = IMAGE_URL + credit!!.profilePath)
                     }
                 }
             }
@@ -268,7 +283,7 @@ fun convertToHours(minutes: Int): Pair<Int, Int> {
 
 
 @Composable
-fun ActorsItem(image:String) {
+fun ActorsItem(image: String) {
     AsyncImage(
         model = image, contentDescription = "TabIndicatorImages", modifier = Modifier
             .height(130.dp)

@@ -2,6 +2,7 @@ package com.nurlanamirzayeva.gamejet.ui.activities.mainpage
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,13 +33,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.sky_blue
 
-@Preview
+
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(navController:NavHostController,name:String, email:String) {
 
     val accountSettingItems = listOf<String>("Dark Mode", "History", "Lists", "Diary")
     val helpAndSupportAccounts =
@@ -87,7 +89,7 @@ fun ProfileScreen() {
             )
         }
         Text(
-            "Johnny Depp",
+            text=name,
             color = Color.White,
             fontSize = 24.sp,
             fontWeight = FontWeight.SemiBold,
@@ -96,7 +98,7 @@ fun ProfileScreen() {
                 .padding(top = 12.dp)
         )
         Text(
-            "jacksparrow@gmail.com",
+            text= email,
             fontSize = 14.sp,
             color = Color.Gray,
             fontWeight = FontWeight.SemiBold,
@@ -115,7 +117,7 @@ fun ProfileScreen() {
 
         accountSettingItems.forEach { accountSettingItem ->
 
-            ProfileItem(text = accountSettingItem)
+            ProfileItem(text = accountSettingItem, onClick = {navController.navigate(Screens.DarkMode)})
         }
 
         Text(
@@ -142,7 +144,7 @@ fun ProfileScreen() {
 }
 
 @Composable
-fun ProfileItem(text: String) {
+fun ProfileItem(text: String,onClick: (() -> Unit) = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -165,6 +167,7 @@ fun ProfileItem(text: String) {
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
+                    .clickable {onClick()}
 
             )
             Icon(

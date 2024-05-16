@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -37,17 +38,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
-import com.nurlanamirzayeva.gamejet.R
-import com.nurlanamirzayeva.gamejet.model.DetailsResponse
-import com.nurlanamirzayeva.gamejet.network.ApiClient
-import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
-import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
-import com.nurlanamirzayeva.gamejet.ui.activities.login.Screens
+import com.nurlanamirzayeva.gamejet.ui.activities.mainpage.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.BottomBarTabs
 import com.nurlanamirzayeva.gamejet.ui.components.BottomNavItems
 import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
+import com.nurlanamirzayeva.gamejet.viewmodel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
@@ -58,93 +55,100 @@ class MainPageActivity : ComponentActivity() {
 
     lateinit var navController: NavHostController
 
-    lateinit var auth:FirebaseAuth
+    lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
         setContent {
+            val mainPageViewModel = hiltViewModel<MainPageViewModel>()
+            val settingsViewModel = hiltViewModel<SettingsViewModel>()
             navController = rememberNavController()
-            GameJetTheme {
+            val name = intent.getStringExtra("name") ?: ""
+            val email = intent.getStringExtra("email") ?: ""
+            GameJetTheme(settingsViewModel) {
 
-                val mainPageViewModel = hiltViewModel<MainPageViewModel>()
+
                 val navBackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackEntry?.destination?.route
                 var selectedTabIndex by remember { mutableIntStateOf(1) }
                 val hazeState = remember { HazeState() }
                 Scaffold(containerColor = dark_grey, bottomBar = {
+                    if(currentRoute in listOf(Screens.MainPage,Screens.Profile)) {
 
-                    Box(
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .fillMaxWidth()
-                            .height(64.dp)
-                            .hazeChild(state = hazeState, shape = CircleShape)
-                            .border(
-                                width = Dp.Hairline,
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.White.copy(alpha = .8f),
-                                        Color.White.copy(alpha = .2f),
-                                    )
-                                ),
-                                shape = CircleShape
-                            )
-
-                    ) {
-                        BottomBarTabs(
-                            tabs = BottomNavItems.entries.toList(),
-                            selectedTab = selectedTabIndex,
-                            onTabSelected = {item->
-                                if (selectedTabIndex==BottomNavItems.entries.indexOf(item))
-                                    return@BottomBarTabs
-                                selectedTabIndex = BottomNavItems.entries.indexOf(item)
-                                navController.navigate(item.route){
-                                    popUpTo(item.route) { inclusive = true }
-                                }
-
-                            }
-                        )
-
-
-                        val animatedSelectedTabIndex by animateFloatAsState(
-                            targetValue = selectedTabIndex.toFloat(),
-                            label = "animatedSelectedTabIndex",
-                            animationSpec = spring(
-                                stiffness = Spring.StiffnessLow,
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                            )
-                        )
-
-                        val animatedColor by animateColorAsState(
-                            targetValue = BottomNavItems.entries[selectedTabIndex].color,
-                            label = "animatedColor",
-                            animationSpec = spring(
-                                stiffness = Spring.StiffnessLow,
-                            )
-                        )
-
-                        Canvas(
+                        Box(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                                .blur(50.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                                .padding(horizontal = 4.dp, vertical = 8.dp)
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .hazeChild(state = hazeState, shape = CircleShape)
+                                .border(
+                                    width = Dp.Hairline,
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.White.copy(alpha = .8f),
+                                            Color.White.copy(alpha = .2f),
+                                        )
+                                    ),
+                                    shape = CircleShape
+                                )
+
                         ) {
-                            val tabWidth = size.width / BottomNavItems.entries.size
-                            drawCircle(
-                                color = animatedColor.copy(alpha = .6f),
-                                radius = size.height / 2,
-                                center = Offset(
-                                    (tabWidth * animatedSelectedTabIndex) + tabWidth / 2,
-                                    size.height / 2
+                            BottomBarTabs(
+                                tabs = BottomNavItems.entries.toList(),
+                                selectedTab = selectedTabIndex,
+                                onTabSelected = { item ->
+                                    if (selectedTabIndex == BottomNavItems.entries.indexOf(item))
+                                        return@BottomBarTabs
+                                    selectedTabIndex = BottomNavItems.entries.indexOf(item)
+                                    navController.navigate(item.route) {
+                                        popUpTo(item.route) { inclusive = true }
+                                    }
+
+                                }
+                            )
+
+
+                            val animatedSelectedTabIndex by animateFloatAsState(
+                                targetValue = selectedTabIndex.toFloat(),
+                                label = "animatedSelectedTabIndex",
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessLow,
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
                                 )
                             )
+
+                            val animatedColor by animateColorAsState(
+                                targetValue = BottomNavItems.entries[selectedTabIndex].color,
+                                label = "animatedColor",
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessLow,
+                                )
+                            )
+
+                            Canvas(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape)
+                                    .blur(50.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                            ) {
+                                val tabWidth = size.width / BottomNavItems.entries.size
+                                drawCircle(
+                                    color = animatedColor.copy(alpha = .6f),
+                                    radius = size.height / 2,
+                                    center = Offset(
+                                        (tabWidth * animatedSelectedTabIndex) + tabWidth / 2,
+                                        size.height / 2
+                                    )
+                                )
+                            }
+
+
                         }
-
-
                     }
 
-                }) {padding->
+                }) { padding ->
                     Column(
                         modifier = Modifier
                             .padding()
@@ -157,7 +161,7 @@ class MainPageActivity : ComponentActivity() {
                             .fillMaxSize(),
                     ) {
                         MainPageNavGraph(
-                            navController = navController, mainPageViewModel = mainPageViewModel
+                            navController = navController, mainPageViewModel = mainPageViewModel,settingsViewModel=settingsViewModel,name=name,email=email
                         )
                     }
                 }

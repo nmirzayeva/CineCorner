@@ -3,6 +3,7 @@ package com.nurlanamirzayeva.gamejet.ui.activities.mainpage
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,8 +45,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
 import coil.compose.AsyncImage
-import com.google.android.play.integrity.internal.i
-import com.nurlanamirzayeva.gamejet.R
+
 import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.ui.components.TextSwitch
 import com.nurlanamirzayeva.gamejet.ui.theme.black
@@ -76,7 +76,6 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
         var selectedIndex by remember {
             mutableIntStateOf(0)
         }
-
         val (hours, remainingMinutes) = convertToHours(it.runtime!!)
 
 
@@ -87,148 +86,59 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
                 .verticalScroll(rememberScrollState())
         ) {
 
-            Box {
 
-                when(videoItemState.value) {
-                    is NetworkState.Loading -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Center))
-                    }
-
-                    is NetworkState.Success -> {
-                        val videoItem = (videoItemState.value as NetworkState.Success<Videos>).data.results?.find { video ->
-                            video?.type == "Trailer"
-                        }?.key ?: ""
-                        if (videoItem.isNotEmpty()) {
-                            YouTubePlayer(
-                                youtubeVideoId = videoItem,
-                                lifeCycleOwner = LocalLifecycleOwner.current
-                            )
-                        }
-                    }
-
-                    is NetworkState.Error -> {
-
-                    }
-
-                    else -> {}
+            when (videoItemState.value) {
+                is NetworkState.Loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
 
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomStart)
-                        .padding(horizontal = 20.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = it.title.toString(),
-                        color = Color.White,
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .wrapContentWidth()
-                    )
-                    Box(
-                        modifier = Modifier
-                            .width(100.dp)
-                            .height(30.dp)
-                            .background(color = Color.Yellow, shape = RoundedCornerShape(8.dp))
-                            .align(Alignment.CenterVertically)
-                    ) {
-
-                        Text(
-                            text = "IMDB: ${it.voteAverage.toString()}",
-                            color = Color.Black,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            modifier = Modifier.align(
-                                Alignment.Center
-                            )
+                is NetworkState.Success -> {
+                    val videoItem =
+                        (videoItemState.value as NetworkState.Success<Videos>).data.results?.find { video ->
+                            video?.type == "Trailer"
+                        }?.key ?: ""
+                    if (videoItem.isNotEmpty()) {
+                        YouTubePlayer(
+                            youtubeVideoId = videoItem,
+                            lifeCycleOwner = LocalLifecycleOwner.current
                         )
                     }
                 }
+
+                is NetworkState.Error -> {
+
+                }
+
+                else -> {}
             }
+
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 10.dp, start = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(start = 10.dp, end = 10.dp, top = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
-                it.genres?.forEachIndexed { index, genre ->
-
-                    when (index) {
-                        0 -> {
-                            Box(
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(36.dp)
-                                    .background(color = black, shape = RoundedCornerShape(8.dp))
-                                    .align(Alignment.CenterVertically)
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color.Gray,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                            ) {
-
-                                Text(
-                                    text = genre?.name.toString(),
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    modifier = Modifier.align(
-                                        Alignment.Center
-                                    )
-                                )
-                            }
-                        }
-
-                        1 -> {
-                            Box(
-                                modifier = Modifier
-                                    .width(100.dp)
-                                    .height(36.dp)
-                                    .background(color = black, shape = RoundedCornerShape(8.dp))
-                                    .align(Alignment.CenterVertically)
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color.Gray,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                            ) {
-
-                                Text(
-                                    text = genre?.name.toString(),
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    modifier = Modifier.align(
-                                        Alignment.Center
-                                    )
-                                )
-                            }
-                        }
-
-                    }
-
-                }
-
+                Text(
+                    text = it.title.toString(),
+                    color = Color.White,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(230.dp)
+                )
                 Box(
                     modifier = Modifier
                         .width(100.dp)
-                        .height(36.dp)
-                        .background(color = black, shape = RoundedCornerShape(8.dp))
+                        .height(30.dp)
+                        .background(color = Color.Yellow, shape = RoundedCornerShape(8.dp))
                         .align(Alignment.CenterVertically)
-                        .border(width = 1.dp, color = Color.Gray, shape = RoundedCornerShape(8.dp))
                 ) {
 
                     Text(
-                        text = "${hours}h ${remainingMinutes}m",
-                        color = Color.White,
+                        text = "IMDB: ${it.voteAverage.toString()}",
+                        color = Color.Black,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         modifier = Modifier.align(
@@ -236,6 +146,24 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
                         )
                     )
                 }
+            }
+
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp),modifier=Modifier.padding(start=10.dp,end=10.dp,top=10.dp)) {
+                it.genres?.forEachIndexed { index, genre ->
+                    when (index) {
+                        0 -> {
+                            item { GenresViewItem(genreName = genre?.name.toString())}
+                        }
+
+
+                        1 -> {
+                           item{ GenresViewItem(genreName = genre?.name.toString())}
+                        }
+
+                    }
+
+                }
+                  item{GenresViewItem(genreName = "${hours}h ${remainingMinutes}m")}
             }
 
             Text(
@@ -274,7 +202,6 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
         }
     }
 }
-
 fun convertToHours(minutes: Int): Pair<Int, Int> {
     val hours = minutes / 60
     val remainingMinutes = minutes % 60
@@ -300,7 +227,8 @@ fun YouTubePlayer(youtubeVideoId: String, lifeCycleOwner: LifecycleOwner) {
     AndroidView(
         modifier = Modifier
             .fillMaxWidth()
-            .height(350.dp)
+            .height(220.dp)
+            .padding(4.dp)
             .clip(shape = RoundedCornerShape(8.dp)),
         factory = {
 
@@ -317,6 +245,32 @@ fun YouTubePlayer(youtubeVideoId: String, lifeCycleOwner: LifecycleOwner) {
             }
         })
 
+}
+
+@Composable
+fun GenresViewItem(genreName:String) {
+    Box(
+        modifier = Modifier
+            .width(100.dp)
+            .height(36.dp)
+            .background(color = black, shape = RoundedCornerShape(8.dp))
+            .border(
+                width = 1.dp,
+                color = Color.Gray,
+                shape = RoundedCornerShape(8.dp)
+            )
+    ) {
+
+        Text(
+            text = genreName,
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            modifier = Modifier.align(
+                Alignment.Center
+            )
+        )
+    }
 }
 
 

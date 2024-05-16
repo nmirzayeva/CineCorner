@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -11,12 +12,16 @@ import androidx.navigation.compose.composable
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.view.mainpage.MainPage
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
+import com.nurlanamirzayeva.gamejet.viewmodel.SettingsViewModel
 import retrofit2.Response
 
 @Composable
 fun MainPageNavGraph(
     navController: NavHostController,
     mainPageViewModel: MainPageViewModel,
+    settingsViewModel: SettingsViewModel,
+   name:String,
+    email: String
 ) {
 
     NavHost(navController = navController, startDestination = Screens.MainPage) {
@@ -27,18 +32,22 @@ fun MainPageNavGraph(
 
         composable(route = Screens.ViewAllDiscover) {
 
-            ViewAllDiscoverScreen(mainPageViewModel = mainPageViewModel)
+            ViewAllDiscoverScreen(mainPageViewModel = mainPageViewModel,navController=navController)
 
         }
         composable(route = Screens.ViewAllTrending) {
 
-            ViewAllTrendingScreen(mainPageViewModel = mainPageViewModel)
+            ViewAllTrendingScreen(mainPageViewModel = mainPageViewModel,navController=navController)
         }
         composable(route=Screens.Profile){
-            ProfileScreen()
+            ProfileScreen(navController=navController,name=name,email=email )
         }
         composable(route=Screens.Detail){
             DetailScreen(mainPageViewModel=mainPageViewModel)
+        }
+
+        composable(route=Screens.DarkMode){
+            DarkModeScreen(settingsViewModel = settingsViewModel )
         }
 
     }
@@ -50,6 +59,7 @@ object Screens {
     const val ViewAllDiscover = "ViewAllDiscover"
     const val ViewAllTrending = "ViewAllTrending"
     const val Detail="Detail"
+    const val DarkMode="DarkMode"
 }
 
 

@@ -2,6 +2,7 @@ package com.nurlanamirzayeva.gamejet.ui.activities.mainpage
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
@@ -37,7 +39,7 @@ import com.nurlanamirzayeva.gamejet.utils.IMAGE_URL
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 
 @Composable
-fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel) {
+fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel,navController:NavHostController) {
 
     val trendingPageList = mainPageViewModel.trendingListPager.collectAsLazyPagingItems()
     val context = LocalContext.current
@@ -50,14 +52,14 @@ fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(color = grey)
-                .height(100.dp)
+                .height(80.dp)
         ) {
 
 
             Text(
                 text = "List",
                 color = Color.White,
-                fontSize = 30.sp,
+                fontSize = 28.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .align(
@@ -77,27 +79,12 @@ fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel) {
         ) {
 
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = black)
-                    .height(230.dp)
-            ) {
-                AsyncImage(
-                    model = BACKGROUND_URL + mainPageViewModel.firstTrendingImage.value,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentScale = ContentScale.FillBounds
-                )
-
-            }
-
             Text(
-                text = "Discover great movies and TV shows for your Watchlist",
+                text = "Discover trending movies for your Watchlist",
                 color = Color.White,
-                fontSize = 18.sp,
+                fontSize = 22.sp,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 20.dp)
             )
 
 
@@ -116,7 +103,7 @@ fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel) {
                     content = {
 
                         items(trendingPageList.itemCount) { index ->
-                            TrendingItem(imageUrl = IMAGE_URL + trendingPageList[index]!!.posterPath)
+                            TrendingItem(imageUrl = IMAGE_URL + trendingPageList[index]!!.posterPath, onclick ={navController.navigate(Screens.Detail)} )
                         }
 
                         with(trendingPageList)
@@ -169,7 +156,7 @@ fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel) {
 }
 
 @Composable
-fun TrendingItem(imageUrl: String) {
+fun TrendingItem(imageUrl: String,onclick:()->Unit={}) {
 
 
     Box(
@@ -177,6 +164,7 @@ fun TrendingItem(imageUrl: String) {
             .background(color = black)
             .height(130.dp)
             .width(100.dp)
+            .clickable { onclick() }
     ) {
 
         AsyncImage(

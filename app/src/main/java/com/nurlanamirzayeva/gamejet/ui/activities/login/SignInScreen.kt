@@ -47,9 +47,10 @@ import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.green
 import com.nurlanamirzayeva.gamejet.ui.theme.sky_blue
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
+import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
-
-
+import com.nurlanamirzayeva.gamejet.viewmodel.SharedViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
 
@@ -69,6 +70,7 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
     }
 
 
+
     Box {
         Column(
             modifier = Modifier
@@ -83,7 +85,7 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
 
         ) {
 
-            Text("GameJet", color = Color.White, fontSize = 40.sp, fontWeight = FontWeight.Medium)
+            Text("CineCorner", color = Color.White, fontSize = 40.sp, fontWeight = FontWeight.Medium)
 
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
 
@@ -160,7 +162,6 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
                             ).show()
                         } ?: run {
 
-
                             viewModel.signIn(email.text, password.text)
 
                         }
@@ -218,7 +219,13 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
 
             is NetworkState.Success -> {
 
-                context.startActivity(Intent(context,MainPageActivity::class.java))
+
+                val intent=Intent(context,MainPageActivity::class.java).apply {
+                    putExtra("name",viewModel.userName.value)
+                    putExtra("email",viewModel.userEmail.value)
+                }
+                context.startActivity(intent)
+
             }
 
 

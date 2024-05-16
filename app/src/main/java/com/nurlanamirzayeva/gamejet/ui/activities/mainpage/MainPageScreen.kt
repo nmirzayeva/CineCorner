@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,20 +50,22 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
     val moviesState = mainPageViewModel.movieListResponse.collectAsState()
     val trendingMoviesState = mainPageViewModel.trendingMovieResponse.collectAsState()
-
+    val upcomingMoviesState =mainPageViewModel.upcomingMovieResponse.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
 
         mainPageViewModel.getMovieList()
         mainPageViewModel.getTrendingNow()
+        mainPageViewModel.getUpcomingMovies()
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = dark_grey)
-            .padding(horizontal = 14.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+            .padding(start=14.dp,end=14.dp, top=16.dp, bottom = 80.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
 
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -78,7 +82,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
             )
             Text(
-                "Hello, Johnny",
+                "Hello,!",
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -109,14 +113,14 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(vertical = 8.dp)
+            contentPadding = PaddingValues(vertical = 4.dp)
         ) {
 
             moviesState.value?.results?.let {
 
                 items(items = it) { movie ->
 
-                    SpecialOfferItems(imageUrl = IMAGE_URL + movie.posterPath, onClick = {
+                    MovieItems(imageUrl = IMAGE_URL + movie.posterPath, onClick = {
                         Log.d("TAG", "MainPage:${movie.id} ")
                         movie.id?.let { movieId ->
                             mainPageViewModel.movieId.intValue = movieId
@@ -157,14 +161,14 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-
+            contentPadding = PaddingValues(vertical = 4.dp)
             ) {
 
             trendingMoviesState.value?.results?.let {
 
                 items(items = it) { movie ->
 
-                    SpecialOfferItems(imageUrl = IMAGE_URL + movie.posterPath, onClick = {
+                    MovieItems(imageUrl = IMAGE_URL + movie.posterPath, onClick = {
                         movie.id?.let { movieId->
                             mainPageViewModel.movieId.intValue = movieId
                         }
@@ -176,6 +180,52 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
         }
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+
+            Text(
+                text = "Upcoming",
+                color = Color.White,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Text(
+                text = "View All",
+                color = sky_blue,
+                fontWeight = FontWeight.Normal,
+                fontSize = 20.sp,
+                modifier = Modifier
+                    .align(
+                        Alignment.CenterVertically
+                    )
+                    .clickable { navController.navigate(Screens.ViewAllTrending) }
+            )
+        }
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(vertical = 4.dp)
+        ) {
+
+            upcomingMoviesState.value?.results?.let {upcomingList->
+
+                items(items = upcomingList) { upcoming ->
+
+                    MovieItems(imageUrl = IMAGE_URL + upcoming!!.posterPath, onClick = {
+                        upcoming.id?.let { upcomingId->
+                            mainPageViewModel.movieId.intValue = upcomingId
+                        }
+                        navController.navigate(route = Screens.Detail)
+                    })
+
+                }
+            }
+
+        }
 
     }
 
@@ -183,7 +233,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 }
 
 @Composable
-fun SpecialOfferItems(imageUrl: String, onClick: () -> Unit) {
+fun MovieItems(imageUrl: String, onClick: () -> Unit) {
 
 
     Box(

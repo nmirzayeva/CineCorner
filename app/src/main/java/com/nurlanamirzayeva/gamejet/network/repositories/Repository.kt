@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.nurlanamirzayeva.gamejet.utils.EMAIL
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
@@ -13,6 +14,7 @@ import com.nurlanamirzayeva.gamejet.utils.PASSWORD
 import com.nurlanamirzayeva.gamejet.utils.UID
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class Repository @Inject constructor(
@@ -61,6 +63,7 @@ class Repository @Inject constructor(
     }
 
 
+
     suspend fun signIn(email: String, password: String) = callbackFlow<NetworkState<Boolean>> {
 
         val successListener = OnSuccessListener<AuthResult> {
@@ -80,13 +83,31 @@ class Repository @Inject constructor(
             .addOnFailureListener(failureListener)
 
 
-
         awaitClose {
             channel.close()
         }
 
 
     }
+
+    suspend fun getUserData(userId: String): Pair<String?, String?> {
+        val userDataRef = fireStore.collection("users").document(userId)
+
+        return try {
+            val userDataSnapshot = userDataRef.get().await()
+            if (userDataSnapshot.exists()) {
+                val name = userDataSnapshot.getString("user_name")
+                val email = userDataSnapshot.getString("email")
+                Pair(name, email)
+            } else {
+                Pair(null, null)
+            }
+        } catch (e: Exception) {
+            Pair(null, null)
+        }
+    }
+
+
 
     suspend fun resetPassword(email: String) = callbackFlow<NetworkState<Boolean>> {
         val completeListener = OnCompleteListener<Void> {

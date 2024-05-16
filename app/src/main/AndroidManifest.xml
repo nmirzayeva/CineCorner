@@ -16,16 +16,15 @@
         android:theme="@style/Theme.GameJet"
         tools:targetApi="31" >
         <activity
-            android:name=".ui.activities.mainpage.MainPageActivity"
+            android:name=".view.login.HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.login.HomeActivity"
+            android:name=".ui.activities.mainpage.MainPageActivity"
             android:exported="true"
             android:theme="@style/Theme.GameJet" >
         </activity>

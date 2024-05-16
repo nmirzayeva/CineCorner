@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.nurlanamirzayeva.gamejet.ui.activities.login.LoginNavGraph
 import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
 import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
+import com.nurlanamirzayeva.gamejet.viewmodel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -24,9 +25,10 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val viewModel = hiltViewModel<RegisterViewModel>()
+            val settingsViewModel= hiltViewModel<SettingsViewModel>()
             navController = rememberNavController()
-            GameJetTheme {
-                val viewModel = hiltViewModel<RegisterViewModel>()
+            GameJetTheme(settingsViewModel) {
 
                 Surface {
                     LoginNavGraph(

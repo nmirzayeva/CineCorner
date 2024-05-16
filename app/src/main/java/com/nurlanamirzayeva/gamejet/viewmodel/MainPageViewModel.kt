@@ -1,5 +1,6 @@
 package com.nurlanamirzayeva.gamejet.viewmodel
 
+import android.provider.ContactsContract.CommonDataKinds.Email
 import android.provider.MediaStore.Video
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -18,6 +19,7 @@ import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.paging.DiscoverPagingSource
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
 import com.nurlanamirzayeva.gamejet.model.ResultsVideoItem
+import com.nurlanamirzayeva.gamejet.model.UpcomingResponse
 import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
@@ -43,6 +45,9 @@ class MainPageViewModel @Inject constructor(
     private val _trendingMovieResponse: MutableStateFlow<DiscoverResponse?> = MutableStateFlow(null)
     val trendingMovieResponse = _trendingMovieResponse.asStateFlow()
 
+    private val _upcomingMoviesResponse:MutableStateFlow<UpcomingResponse?> =MutableStateFlow(null)
+    val upcomingMovieResponse=_upcomingMoviesResponse.asStateFlow()
+
     private val _detailPageResponse: MutableStateFlow<DetailsResponse?> = MutableStateFlow(null)
     val detailPageResponse = _detailPageResponse.asStateFlow()
 
@@ -52,10 +57,6 @@ class MainPageViewModel @Inject constructor(
     private val _creditListResponse:MutableStateFlow<CreditsResponse?> = MutableStateFlow(null)
     val creditListResponse=_creditListResponse.asStateFlow()
 
-
-    val firstDiscoverImage = mutableStateOf("")
-
-    val firstTrendingImage = mutableStateOf("")
 
     var errorMessage: String by mutableStateOf("")
 
@@ -76,11 +77,7 @@ class MainPageViewModel @Inject constructor(
 
                         _movieListResponse.value = it.body()
 
-                        if (firstDiscoverImage.value.isEmpty()) {
-                            firstDiscoverImage.value =
-                                it.body()?.results!![1].backdropPath.toString()
 
-                        }
                     }
 
                 }
@@ -102,16 +99,26 @@ class MainPageViewModel @Inject constructor(
                 mainPageRepository.getTrendingNow(page = 1).also {
                     if (it.isSuccessful) {
                         _trendingMovieResponse.value = it.body()
-                        if (firstTrendingImage.value.isEmpty()) {
-                            firstTrendingImage.value =
-                                it.body()?.results!![1].backdropPath.toString()
-                        }
-
                     }
                 }
             } catch (e: Exception) {
 
                 errorMessage = e.message.toString()
+            }
+
+        }
+    }
+
+    fun getUpcomingMovies(){
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                mainPageRepository.getUpcomingMovies(page = 1).also {
+                    if(it.isSuccessful){
+                        _upcomingMoviesResponse.value=it.body()
+                    }
+                }
+            } catch (e:Exception){
+                errorMessage=e.message.toString()
             }
 
         }
@@ -165,8 +172,6 @@ class MainPageViewModel @Inject constructor(
             }
         }
     }
-
-
 
 
     val discoverListPager = Pager(

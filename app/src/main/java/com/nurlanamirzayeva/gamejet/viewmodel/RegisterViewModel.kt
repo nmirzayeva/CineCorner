@@ -3,6 +3,7 @@ package com.nurlanamirzayeva.gamejet.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.network.repositories.Repository
 import com.nurlanamirzayeva.gamejet.utils.CONFIRM_PASSWORD
@@ -33,18 +34,38 @@ class RegisterViewModel @Inject constructor(private val repository: Repository) 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage
 
+    private val _userName=MutableStateFlow("")
+    val userName=_userName.asStateFlow()
+
+    private val _userEmail=MutableStateFlow("")
+    val userEmail =_userEmail.asStateFlow()
+
+    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
     fun signIn(email: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
             _signInSuccess.value = NetworkState.Loading()
-            repository.signIn(email, password).collectLatest {
-                _signInSuccess.value = it
+            repository.signIn(email, password).collectLatest {state->
+                _signInSuccess.value = state
+                if(state is NetworkState.Success){
+                    val userId=auth.currentUser?.uid ?:""
+                    fetchUserData(userId)
+
+                }
             }
 
 
         }
 
 
+    }
+
+    private fun fetchUserData(userId:String){
+        viewModelScope.launch(Dispatchers.IO) {
+            val userData=repository.getUserData(userId)
+            _userName.value=userData.first ?:""
+            _userEmail.value=userData.second ?:""
+        }
     }
 
     fun signUp(context: Context, userMap: HashMap<String, String>) {

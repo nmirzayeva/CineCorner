@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "GameJet"
+rootProject.name = "CineCorner"
 include(":app")
  

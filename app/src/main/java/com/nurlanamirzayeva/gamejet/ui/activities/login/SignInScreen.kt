@@ -1,6 +1,5 @@
 package com.nurlanamirzayeva.gamejet.view.login
 
-import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -47,20 +46,15 @@ import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.green
 import com.nurlanamirzayeva.gamejet.ui.theme.sky_blue
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
-import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
-import com.nurlanamirzayeva.gamejet.viewmodel.SharedViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+
 @Composable
 fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
 
     var email by remember { mutableStateOf(TextFieldValue()) }
     var password by remember { mutableStateOf(TextFieldValue()) }
     val signInSuccess = viewModel.signInSuccess.collectAsState()
-    val context = LocalContext.current
-    var errorMessage by remember {
-        mutableStateOf<String?>(null)
-    }
+
     val isValidEmail = remember(email.text) {
         derivedStateOf { viewModel.isEmailValid(email.text) }
     }
@@ -68,6 +62,11 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
     val isValidPassword = remember(password.text) {
         derivedStateOf { viewModel.isPasswordValid(password.text) }
     }
+
+    var errorMessage by remember {
+        mutableStateOf<String?>(null)
+    }
+    val context = LocalContext.current
 
 
 
@@ -219,15 +218,10 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
 
             is NetworkState.Success -> {
 
-
-                val intent=Intent(context,MainPageActivity::class.java).apply {
-                    putExtra("name",viewModel.userName.value)
-                    putExtra("email",viewModel.userEmail.value)
-                }
+                val intent=Intent(context,MainPageActivity::class.java)
                 context.startActivity(intent)
 
             }
-
 
             is NetworkState.Error -> {
                 errorMessage =
@@ -239,9 +233,8 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
                 ).show()
 
                 viewModel.reset()
-
-
             }
+
 
             null -> {}
 

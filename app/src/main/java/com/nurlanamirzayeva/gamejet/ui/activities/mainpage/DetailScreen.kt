@@ -1,9 +1,10 @@
 package com.nurlanamirzayeva.gamejet.ui.activities.mainpage
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -21,7 +23,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,9 +51,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.nurlanamirzayeva.gamejet.R
+import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 
 import com.nurlanamirzayeva.gamejet.model.Videos
+import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
 import com.nurlanamirzayeva.gamejet.ui.components.TextSwitch
 import com.nurlanamirzayeva.gamejet.ui.theme.black
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
@@ -59,12 +70,23 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 
 
 @Composable
-fun DetailScreen(mainPageViewModel: MainPageViewModel) {
+fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostController) {
     val detailItemState = mainPageViewModel.detailPageResponse.collectAsState()
     val videoItemState = mainPageViewModel.videoListResponse.collectAsState()
     val creditItemState = mainPageViewModel.creditListResponse.collectAsState()
+    val favoriteFilm=mainPageViewModel.favoriteFilms.collectAsState()
+    val checkFavoriteState=mainPageViewModel.checkFavoriteResponse.collectAsState()
+
+    var errorMessage by remember {
+        mutableStateOf<String?>(null)
+    }
+    var isFavoriteFilm by remember {
+        mutableStateOf(false)
+    }
+    val context = LocalContext.current
 
     LaunchedEffect(key1 = mainPageViewModel.movieId.intValue) {
+        mainPageViewModel.checkFavorite()
         mainPageViewModel.getDetails()
         mainPageViewModel.getVideos()
         mainPageViewModel.getCredits()
@@ -87,7 +109,7 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
         ) {
 
 
-            when (videoItemState.value) {
+            when (val response=videoItemState.value) {
                 is NetworkState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
@@ -106,7 +128,13 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
                 }
 
                 is NetworkState.Error -> {
+                    errorMessage =
+                        response.errorMessage ?: context.getString(R.string.error_message)
 
+                    Toast.makeText(
+                        context,
+                        errorMessage, Toast.LENGTH_SHORT
+                    ).show()
                 }
 
                 else -> {}
@@ -164,6 +192,32 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
 
                 }
                   item{GenresViewItem(genreName = "${hours}h ${remainingMinutes}m")}
+
+                item{ Icon(imageVector = if(favoriteFilm.value is NetworkState.Success) Icons.Rounded.Favorite  else Icons.Rounded.FavoriteBorder , contentDescription =null,tint= if(favoriteFilm.value is NetworkState.Success) Color.Red else Color.White , modifier = Modifier
+                    .size(36.dp)
+                    .clickable {
+                        it.id?.let { movieId ->
+                            if (!isFavoriteFilm) {
+                                mainPageViewModel.addFavorite(
+                                    FavoriteFilm(
+                                        id = movieId,
+                                        userId = mainPageViewModel.userId,
+                                        title = it.title ?: "No Title",
+                                        posterPath = it.posterPath,
+                                        voteAverage = it.voteAverage as Double
+                                    )
+                                )
+                            } else {
+                                mainPageViewModel.removeFavorite()
+                            }
+                        }
+
+
+                    }
+
+
+                )}
+
             }
 
             Text(
@@ -200,6 +254,60 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel) {
 
             Spacer(modifier = Modifier.height(100.dp))
         }
+
+        when (val response =favoriteFilm.value) {
+            is NetworkState.Loading -> {
+
+            }
+
+            is NetworkState.Success -> {
+
+                 isFavoriteFilm=true
+
+
+            }
+
+            is NetworkState.Error -> {
+                errorMessage =
+                    response.errorMessage ?: context.getString(R.string.error_message)
+
+                Toast.makeText(
+                    context,
+                    errorMessage, Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            else -> {}
+        }
+
+        when (val response =checkFavoriteState.value) {
+            is NetworkState.Loading -> {
+
+            }
+
+            is NetworkState.Success -> {
+
+               isFavoriteFilm=true
+                mainPageViewModel.resetFavorite()
+
+
+            }
+
+            is NetworkState.Error -> {
+                errorMessage =
+                    response.errorMessage ?: context.getString(R.string.error_message)
+
+                Toast.makeText(
+                    context,
+                    errorMessage, Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            else -> {}
+        }
+
+
+
     }
 }
 fun convertToHours(minutes: Int): Pair<Int, Int> {
@@ -270,7 +378,9 @@ fun GenresViewItem(genreName:String) {
                 Alignment.Center
             )
         )
+
     }
+
 }
 
 

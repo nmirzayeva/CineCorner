@@ -23,6 +23,10 @@ interface ApiService {
    @GET("movie/upcoming?api_key=$API_KEY")
    suspend fun getUpcomingMovies(@Query("page")page:Int=1):Response<UpcomingResponse>
 
+   @GET("search/movie?api_key=$API_KEY")
+   suspend fun getSearchMovies(@Query("page")page:Int=1,@Query("query") query: String):Response<DiscoverResponse>
+
+
 
    @GET("movie/{movie_id}?api_key=$API_KEY")
    suspend fun getDetails(

@@ -65,8 +65,7 @@ class MainPageActivity : ComponentActivity() {
             val mainPageViewModel = hiltViewModel<MainPageViewModel>()
             val settingsViewModel = hiltViewModel<SettingsViewModel>()
             navController = rememberNavController()
-            val name = intent.getStringExtra("name") ?: ""
-            val email = intent.getStringExtra("email") ?: ""
+
             GameJetTheme(settingsViewModel) {
 
 
@@ -161,7 +160,7 @@ class MainPageActivity : ComponentActivity() {
                             .fillMaxSize(),
                     ) {
                         MainPageNavGraph(
-                            navController = navController, mainPageViewModel = mainPageViewModel,settingsViewModel=settingsViewModel,name=name,email=email
+                            navController = navController, mainPageViewModel = mainPageViewModel,settingsViewModel=settingsViewModel
                         )
                     }
                 }

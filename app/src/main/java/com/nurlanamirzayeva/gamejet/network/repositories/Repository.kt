@@ -90,25 +90,6 @@ class Repository @Inject constructor(
 
     }
 
-    suspend fun getUserData(userId: String): Pair<String?, String?> {
-        val userDataRef = fireStore.collection("users").document(userId)
-
-        return try {
-            val userDataSnapshot = userDataRef.get().await()
-            if (userDataSnapshot.exists()) {
-                val name = userDataSnapshot.getString("user_name")
-                val email = userDataSnapshot.getString("email")
-                Pair(name, email)
-            } else {
-                Pair(null, null)
-            }
-        } catch (e: Exception) {
-            Pair(null, null)
-        }
-    }
-
-
-
     suspend fun resetPassword(email: String) = callbackFlow<NetworkState<Boolean>> {
         val completeListener = OnCompleteListener<Void> {
             if (it.isSuccessful)

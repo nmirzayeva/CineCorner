@@ -10,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
+import com.nurlanamirzayeva.gamejet.paging.SearchPagingSource
 import com.nurlanamirzayeva.gamejet.view.mainpage.MainPage
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.SettingsViewModel
@@ -20,8 +21,7 @@ fun MainPageNavGraph(
     navController: NavHostController,
     mainPageViewModel: MainPageViewModel,
     settingsViewModel: SettingsViewModel,
-   name:String,
-    email: String
+
 ) {
 
     NavHost(navController = navController, startDestination = Screens.MainPage) {
@@ -40,14 +40,20 @@ fun MainPageNavGraph(
             ViewAllTrendingScreen(mainPageViewModel = mainPageViewModel,navController=navController)
         }
         composable(route=Screens.Profile){
-            ProfileScreen(navController=navController,name=name,email=email )
+            ProfileScreen(navController=navController,mainPageViewModel=mainPageViewModel)
         }
         composable(route=Screens.Detail){
-            DetailScreen(mainPageViewModel=mainPageViewModel)
+            DetailScreen(mainPageViewModel=mainPageViewModel,navController=navController)
         }
 
         composable(route=Screens.DarkMode){
             DarkModeScreen(settingsViewModel = settingsViewModel )
+        }
+        composable(route=Screens.Favorite){
+            FavoriteScreen(mainPageViewModel=mainPageViewModel)
+        }
+        composable(route=Screens.Search){
+            SearchMoviesScreen(mainPageViewModel = mainPageViewModel,navController=navController)
         }
 
     }
@@ -60,6 +66,8 @@ object Screens {
     const val ViewAllTrending = "ViewAllTrending"
     const val Detail="Detail"
     const val DarkMode="DarkMode"
+    const val Favorite="Favorite"
+    const val Search="Search"
 }
 
 

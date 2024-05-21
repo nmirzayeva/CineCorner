@@ -6,6 +6,7 @@ import com.nurlanamirzayeva.gamejet.BuildConfig
 import com.nurlanamirzayeva.gamejet.network.ApiService
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.Repository
+import com.nurlanamirzayeva.gamejet.room.FavoriteFilmDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,8 +27,8 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideMainPageRepository(apiService: ApiService):MainPageRepository{
-        return  MainPageRepository(apiService)
+    fun provideMainPageRepository(apiService: ApiService,fireStore: FirebaseFirestore,favoriteFilmDao: FavoriteFilmDao,auth: FirebaseAuth):MainPageRepository{
+        return  MainPageRepository(apiService,fireStore,auth,favoriteFilmDao)
     }
 
 }

@@ -12,8 +12,9 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(private val sharedPreferences: MovieSharedPreferences) : ViewModel() {
 
     private val _currentThemeMode = MutableStateFlow<ThemeMode>(ThemeMode.valueOf(sharedPreferences.themeMode))
-        val currentThemeMode
-            get() = _currentThemeMode.asStateFlow()
+    val currentThemeMode
+        get() = _currentThemeMode.asStateFlow()
+
 
     private fun getSavedThemeMode(): ThemeMode {
         val savedThemeModeString = sharedPreferences.themeMode

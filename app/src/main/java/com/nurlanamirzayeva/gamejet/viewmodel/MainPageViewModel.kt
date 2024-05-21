@@ -1,8 +1,10 @@
 package com.nurlanamirzayeva.gamejet.viewmodel
 
 import android.provider.ContactsContract.CommonDataKinds.Email
+import android.provider.ContactsContract.Profile
 import android.provider.MediaStore.Video
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -12,30 +14,47 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.log
+import com.google.firebase.auth.FirebaseAuth
 import com.nurlanamirzayeva.gamejet.model.CreditsResponse
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.paging.DiscoverPagingSource
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
+import com.nurlanamirzayeva.gamejet.model.ProfileItemDTO
+import com.nurlanamirzayeva.gamejet.model.ResultsItem
 import com.nurlanamirzayeva.gamejet.model.ResultsVideoItem
 import com.nurlanamirzayeva.gamejet.model.UpcomingResponse
 import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
+import com.nurlanamirzayeva.gamejet.paging.SearchPagingSource
 import com.nurlanamirzayeva.gamejet.paging.TrendingPagingSource
+import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainPageViewModel @Inject constructor(
     private val mainPageRepository: MainPageRepository,
-    private val detailPageRepository: DetailPageRepository
+    private val detailPageRepository: DetailPageRepository,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _movieListResponse: MutableStateFlow<DiscoverResponse?> =
@@ -57,11 +76,93 @@ class MainPageViewModel @Inject constructor(
     private val _creditListResponse:MutableStateFlow<CreditsResponse?> = MutableStateFlow(null)
     val creditListResponse=_creditListResponse.asStateFlow()
 
+    private val _checkFavoriteResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
+    val checkFavoriteResponse=_checkFavoriteResponse.asStateFlow()
+
 
     var errorMessage: String by mutableStateOf("")
 
     var movieId = mutableIntStateOf(0 )
 
+    private val _profileInfo:MutableStateFlow<NetworkState<ProfileItemDTO>?> = MutableStateFlow(null)
+    val profileInfo=_profileInfo.asStateFlow()
+
+    private val _filmDetails = MutableStateFlow<DetailsResponse?>(null)
+    val filmDetails = _filmDetails.asStateFlow()
+
+    private val _favoriteFilms=MutableStateFlow<NetworkState<Boolean>?>(null)
+    val favoriteFilms = _favoriteFilms.asStateFlow()
+
+    val userId= auth.currentUser?.uid ?: "unknown"
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery
+
+    private val _searchResults = MutableStateFlow<PagingData<ResultsItem>>(PagingData.empty())
+    val  searchResults:StateFlow<PagingData<ResultsItem>> =_searchResults.asStateFlow()
+
+
+    fun getSearchResults() = viewModelScope.launch {
+        _searchQuery.collectLatest { searchTerm ->
+            Pager(
+                config = PagingConfig(pageSize = 20),
+                initialKey = 1,
+                pagingSourceFactory = {
+                    SearchPagingSource(mainPageRepository = mainPageRepository, searchTerm = searchTerm)
+                }
+            ).flow
+                .catch { viewModelScope.launch { } }
+                .collectLatest { _searchResults.value = it }
+        }
+    }
+
+
+
+
+    fun getFilmDetails() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val response = detailPageRepository.getDetails(movieId.intValue)
+            if (response.isSuccessful) {
+                _filmDetails.value = response.body()
+            }
+        }
+    }
+
+
+    fun addFavorite(film: FavoriteFilm) {
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.addFavoriteFilms(film).collectLatest {state->
+                _favoriteFilms.value=state
+
+            }
+        }
+    }
+
+
+    fun addFavoriteLocal(film: FavoriteFilm) {
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.addFavoriteLocal(film)
+        }
+    }
+
+    fun removeFavorite() {
+        viewModelScope.launch(Dispatchers.IO) {
+         mainPageRepository.removeFavoriteFilm(movieId.intValue)
+        }
+    }
+
+    fun checkFavorite(){
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.checkFavoriteFilm(movieId.intValue).collectLatest {state->
+                _checkFavoriteResponse.value=state
+
+            }
+        }
+
+    }
+    fun resetFavorite() {
+        _checkFavoriteResponse.value = null
+    }
 
 
     fun getMovieList() {
@@ -160,6 +261,20 @@ class MainPageViewModel @Inject constructor(
 
     }
 
+     fun fetchUserData(){
+        viewModelScope.launch(Dispatchers.IO) {
+            auth.currentUser?.uid?.let {uid->
+                mainPageRepository.getUserData(uid).collectLatest{state->
+                    if(uid.isNotEmpty()) {
+                        _profileInfo.value=state
+                    }
+                }
+            }
+
+
+        }
+    }
+
     fun getCredits(){
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -185,6 +300,10 @@ class MainPageViewModel @Inject constructor(
         }
 
     ).flow.cachedIn(viewModelScope)
+
+
+
+
 
 
     val trendingListPager = Pager(

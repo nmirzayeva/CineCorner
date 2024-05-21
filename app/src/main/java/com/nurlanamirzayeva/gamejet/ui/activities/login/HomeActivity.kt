@@ -1,5 +1,6 @@
 package com.nurlanamirzayeva.gamejet.view.login
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,6 +10,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.nurlanamirzayeva.gamejet.ui.activities.login.LoginNavGraph
+import com.nurlanamirzayeva.gamejet.ui.activities.mainpage.MainPageActivity
 import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
 import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.SettingsViewModel
@@ -24,21 +26,23 @@ class HomeActivity : ComponentActivity() {
     lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             val viewModel = hiltViewModel<RegisterViewModel>()
-            val settingsViewModel= hiltViewModel<SettingsViewModel>()
+            val settingsViewModel = hiltViewModel<SettingsViewModel>()
             navController = rememberNavController()
             GameJetTheme(settingsViewModel) {
 
                 Surface {
                     LoginNavGraph(
                         navController = navController,
-                        viewModel=viewModel
+                        viewModel = viewModel, auth = auth
                     )
                 }
             }
         }
     }
 }
+
 
 

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.google.firebase.auth.FirebaseAuth
 import com.nurlanamirzayeva.gamejet.view.login.ResetEmail
 import com.nurlanamirzayeva.gamejet.view.login.SignIn
 import com.nurlanamirzayeva.gamejet.view.login.SignUp
@@ -15,16 +16,21 @@ import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
 
 fun LoginNavGraph(
     navController: NavHostController,
-    viewModel: RegisterViewModel
+    viewModel: RegisterViewModel,
+    auth:FirebaseAuth
 ) {
 
-    NavHost(navController = navController, startDestination = Screens.SignIn) {
+    NavHost(navController = navController, startDestination = Screens.Splash) {
+        composable(route="Splash"){
+            SplashScreen(navController = navController, auth =auth  )
+        }
+
         composable(route = "SignIn") {
 
             SignIn(navController = navController,viewModel=viewModel )
 
-
         }
+
         composable(route = "SignUp") {
 
             SignUp(navController = navController, viewModel=viewModel)
@@ -44,7 +50,6 @@ fun LoginNavGraph(
 object Screens {
     const val SignIn = "SignIn"
     const val SignUp = "SignUp"
-    const val ResetEmail="ResetEmail"
-
-
+    const val ResetEmail= "ResetEmail"
+    const val Splash= "Splash"
 }

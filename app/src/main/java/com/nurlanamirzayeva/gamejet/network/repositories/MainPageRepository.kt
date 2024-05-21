@@ -1,14 +1,135 @@
 package com.nurlanamirzayeva.gamejet.network.repositories
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
+import com.nurlanamirzayeva.gamejet.model.ProfileItemDTO
 import com.nurlanamirzayeva.gamejet.model.UpcomingResponse
 import com.nurlanamirzayeva.gamejet.network.ApiService
+import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
+import com.nurlanamirzayeva.gamejet.room.FavoriteFilmDao
+import com.nurlanamirzayeva.gamejet.utils.NetworkState
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.map
 import retrofit2.Response
 import javax.inject.Inject
 
 
-class MainPageRepository @Inject constructor(private val apiService: ApiService) {
-    suspend fun getMovies(page:Int): Response<DiscoverResponse> = apiService.getMoviesByPage(page)
-    suspend fun getTrendingNow(page:Int):Response<DiscoverResponse> =apiService.getTrendingNow(page)
-    suspend fun getUpcomingMovies(page:Int):Response<UpcomingResponse> =apiService.getUpcomingMovies(page)
+class MainPageRepository @Inject constructor(
+    private val apiService: ApiService,
+    private val fireStore: FirebaseFirestore,
+    private val auth: FirebaseAuth,
+    private val favoriteFilmDao: FavoriteFilmDao
+) {
+    suspend fun getMovies(page: Int): Response<DiscoverResponse> = apiService.getMoviesByPage(page)
+    suspend fun getTrendingNow(page: Int): Response<DiscoverResponse> =
+        apiService.getTrendingNow(page)
+
+    suspend fun getUpcomingMovies(page: Int): Response<UpcomingResponse> =
+        apiService.getUpcomingMovies(page)
+
+     suspend fun getSearchMovies(page: Int,query:String):Response<DiscoverResponse> =apiService.getSearchMovies(page,query)
+
+    suspend fun getUserData(userId: String) = callbackFlow<NetworkState<ProfileItemDTO>> {
+        val userDataRef = fireStore.collection("users").document(userId)
+
+
+        userDataRef.get().addOnCompleteListener { userDataSnapshot ->
+
+            if (userDataSnapshot.isSuccessful) {
+                val name = userDataSnapshot.result.getString("user_name")
+                val email = userDataSnapshot.result.getString("email")
+
+                trySend(NetworkState.Success(ProfileItemDTO(name, email)))
+            } else {
+                trySend(NetworkState.Error(errorMessage = null))
+
+            }
+
+        }.addOnFailureListener {
+            trySend(NetworkState.Error(it.localizedMessage))
+        }
+
+        awaitClose {
+            channel.close()
+        }
+
+    }
+
+    suspend fun addFavoriteFilms(film: FavoriteFilm) = callbackFlow<NetworkState<Boolean>> {
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+
+            fireStore.collection("users").document(userId).collection("favorites").document(film.id.toString())
+                .set(film).addOnCompleteListener {
+                trySend(NetworkState.Success(true))
+
+            }.addOnFailureListener {
+                trySend(NetworkState.Error(it.localizedMessage))
+            }
+        } else {
+            trySend(NetworkState.Error(null))
+        }
+
+        awaitClose {
+            channel.close()
+        }
+
+    }
+
+    suspend fun removeFavoriteFilm(id: Int) = callbackFlow<NetworkState<Boolean>> {
+        val userId = auth.currentUser?.uid
+
+        if (userId != null) {
+            fireStore.collection("users").document(userId).collection("favorites").document(id.toString()).delete()
+                .addOnSuccessListener {
+                    trySend(NetworkState.Success(true))
+                }.addOnFailureListener {
+                trySend(NetworkState.Error(it.localizedMessage))
+            }
+        } else {
+            trySend(NetworkState.Error(null))
+        }
+
+        awaitClose {
+            channel.close()
+        }
+    }
+
+    suspend fun addFavoriteLocal(film: FavoriteFilm) {
+
+        favoriteFilmDao.insertFavoriteFilm(film)
+    }
+
+    suspend fun removeFavoriteLocal(film: FavoriteFilm) {
+        favoriteFilmDao.deleteFavoriteFilm(film)
+
+    }
+
+    suspend fun checkFavoriteFilm(id: Int) = callbackFlow<NetworkState<Boolean>> {
+        val userId = auth.currentUser?.uid
+
+        if (userId != null) {
+            fireStore.collection("users").document(userId).collection("favorites").document(id.toString()).get()
+                .addOnSuccessListener {
+                    if (it.exists()) {
+                        trySend(NetworkState.Success(true))
+                    } else {
+                        trySend(NetworkState.Success(false))
+                    }
+                }.addOnFailureListener {
+                trySend(NetworkState.Error(it.localizedMessage))
+            }
+        } else {
+            trySend(NetworkState.Error(null))
+        }
+
+        awaitClose {
+            channel.close()
+        }
+    }
+
 }

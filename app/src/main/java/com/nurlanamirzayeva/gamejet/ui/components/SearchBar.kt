@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +42,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nurlanamirzayeva.gamejet.R
+import com.nurlanamirzayeva.gamejet.ui.theme.black
+import com.nurlanamirzayeva.gamejet.ui.theme.sky_blue
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 import org.w3c.dom.Text
 
@@ -49,10 +52,10 @@ fun SearchBar(
     hint: String,
     modifier: Modifier = Modifier,
     isEnabled: (Boolean) = true,
-    height: Dp = 40.dp,
+    height: Dp = 50.dp,
     elevation: Dp = 3.dp,
     cornerShape: Shape = RoundedCornerShape(8.dp),
-    backgroundColor: Color = Color.White,
+    backgroundColor: Color = black,
     onSearchClicked: () -> Unit = {},
     onTextChange: (String) -> Unit = {},
     mainPageViewModel:MainPageViewModel
@@ -63,8 +66,8 @@ fun SearchBar(
             .height(height)
             .fillMaxWidth()
             .shadow(elevation = elevation, shape = cornerShape)
-            .background(color = backgroundColor, shape = cornerShape)
-        ,
+            .background(color = backgroundColor, shape = cornerShape),
+
         verticalAlignment = Alignment.CenterVertically
 
     ) {
@@ -79,14 +82,14 @@ fun SearchBar(
                 onTextChange(newText.text)
                 text=newText
 
-
             },
             enabled = isEnabled,
             textStyle = TextStyle(
-                color= Color.Blue,
-                fontSize = 16.sp,
+                color= Color.White,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold
             ),
+            cursorBrush = SolidColor(Color.White),
             decorationBox = {innerTextField ->
 
                 if(text.text.isEmpty()){
@@ -129,20 +132,20 @@ fun SearchBar(
             if (text.text.isNotEmpty()) {
                 Icon(
                     modifier = modifier
-                        .fillMaxSize()
-                        .padding(10.dp),
+                        .padding(6.dp)
+                        .size(30.dp),
                     imageVector = Icons.Rounded.Clear,
                     contentDescription = null,
-                    tint = Color.Black,
+                    tint = sky_blue,
                 )
             } else {
                 Icon(
                     modifier = modifier
-                        .fillMaxSize()
-                        .padding(10.dp),
+                        .padding(6.dp)
+                        .size(30.dp),
                     imageVector = Icons.Rounded.Search,
                     contentDescription = null,
-                    tint = Color.Black,
+                    tint = sky_blue,
                 )
             }
 

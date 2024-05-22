@@ -1,13 +1,7 @@
 package com.nurlanamirzayeva.gamejet.viewmodel
 
-import android.provider.ContactsContract.CommonDataKinds.Email
-import android.provider.ContactsContract.Profile
-import android.provider.MediaStore.Video
-import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -16,7 +10,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import androidx.paging.log
 import com.google.firebase.auth.FirebaseAuth
 import com.nurlanamirzayeva.gamejet.model.CreditsResponse
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
@@ -24,7 +17,7 @@ import com.nurlanamirzayeva.gamejet.paging.DiscoverPagingSource
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
 import com.nurlanamirzayeva.gamejet.model.ProfileItemDTO
 import com.nurlanamirzayeva.gamejet.model.ResultsItem
-import com.nurlanamirzayeva.gamejet.model.ResultsVideoItem
+import com.nurlanamirzayeva.gamejet.model.SimilarMoviesResponse
 import com.nurlanamirzayeva.gamejet.model.UpcomingResponse
 import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
@@ -35,18 +28,12 @@ import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -76,8 +63,14 @@ class MainPageViewModel @Inject constructor(
     private val _creditListResponse:MutableStateFlow<CreditsResponse?> = MutableStateFlow(null)
     val creditListResponse=_creditListResponse.asStateFlow()
 
+    private val _similarListResponse:MutableStateFlow<SimilarMoviesResponse?> = MutableStateFlow(null)
+    val similarListResponse=_similarListResponse.asStateFlow()
+
     private val _checkFavoriteResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
     val checkFavoriteResponse=_checkFavoriteResponse.asStateFlow()
+
+    private val _removeFavoriteResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
+    val removeFavoriteResponse=_removeFavoriteResponse.asStateFlow()
 
 
     var errorMessage: String by mutableStateOf("")
@@ -90,20 +83,21 @@ class MainPageViewModel @Inject constructor(
     private val _filmDetails = MutableStateFlow<DetailsResponse?>(null)
     val filmDetails = _filmDetails.asStateFlow()
 
-    private val _favoriteFilms=MutableStateFlow<NetworkState<Boolean>?>(null)
-    val favoriteFilms = _favoriteFilms.asStateFlow()
+    private val _addFavoriteFilms=MutableStateFlow<NetworkState<Boolean>?>(null)
+    val addFavoriteFilms = _addFavoriteFilms.asStateFlow()
 
     val userId= auth.currentUser?.uid ?: "unknown"
 
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery = _searchQuery
+    var searchQuery = MutableStateFlow("")
+
 
     private val _searchResults = MutableStateFlow<PagingData<ResultsItem>>(PagingData.empty())
     val  searchResults:StateFlow<PagingData<ResultsItem>> =_searchResults.asStateFlow()
 
 
-    fun getSearchResults() = viewModelScope.launch {
-        _searchQuery.collectLatest { searchTerm ->
+    @OptIn(FlowPreview::class)
+    fun getSearchResults() = viewModelScope.launch(Dispatchers.IO) {
+        searchQuery.debounce(1000L).collectLatest { searchTerm ->
             Pager(
                 config = PagingConfig(pageSize = 20),
                 initialKey = 1,
@@ -111,7 +105,7 @@ class MainPageViewModel @Inject constructor(
                     SearchPagingSource(mainPageRepository = mainPageRepository, searchTerm = searchTerm)
                 }
             ).flow
-                .catch { viewModelScope.launch { } }
+                .cachedIn(viewModelScope)
                 .collectLatest { _searchResults.value = it }
         }
     }
@@ -132,7 +126,7 @@ class MainPageViewModel @Inject constructor(
     fun addFavorite(film: FavoriteFilm) {
         viewModelScope.launch(Dispatchers.IO) {
             mainPageRepository.addFavoriteFilms(film).collectLatest {state->
-                _favoriteFilms.value=state
+                _addFavoriteFilms.value=state
 
             }
         }
@@ -147,7 +141,9 @@ class MainPageViewModel @Inject constructor(
 
     fun removeFavorite() {
         viewModelScope.launch(Dispatchers.IO) {
-         mainPageRepository.removeFavoriteFilm(movieId.intValue)
+         mainPageRepository.removeFavoriteFilm(movieId.intValue).collectLatest {state->
+             _removeFavoriteResponse.value=state
+         }
         }
     }
 
@@ -164,6 +160,13 @@ class MainPageViewModel @Inject constructor(
         _checkFavoriteResponse.value = null
     }
 
+    fun resetRemoveFavoriteState() {
+        _removeFavoriteResponse.value = null
+    }
+
+    fun resetAddFavoriteState() {
+        _addFavoriteFilms.value = null
+    }
 
     fun getMovieList() {
 
@@ -281,6 +284,19 @@ class MainPageViewModel @Inject constructor(
             try {
                 val creditItems= detailPageRepository.getCredits(movieId.intValue)
                 _creditListResponse.value=creditItems.body()
+            }
+            catch(e:Exception){
+                errorMessage=e.message.toString()
+            }
+        }
+    }
+
+    fun getSimilar(){
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val similarItems= detailPageRepository.getSimilarMovies(movieId.intValue)
+                _similarListResponse.value= similarItems.body()
             }
             catch(e:Exception){
                 errorMessage=e.message.toString()

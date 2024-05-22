@@ -74,8 +74,11 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
     val detailItemState = mainPageViewModel.detailPageResponse.collectAsState()
     val videoItemState = mainPageViewModel.videoListResponse.collectAsState()
     val creditItemState = mainPageViewModel.creditListResponse.collectAsState()
-    val favoriteFilm=mainPageViewModel.favoriteFilms.collectAsState()
+    val similarItemState=mainPageViewModel.similarListResponse.collectAsState()
+    val favoriteFilm=mainPageViewModel.addFavoriteFilms.collectAsState()
     val checkFavoriteState=mainPageViewModel.checkFavoriteResponse.collectAsState()
+    val removeFavoriteState=mainPageViewModel.removeFavoriteResponse.collectAsState()
+
 
     var errorMessage by remember {
         mutableStateOf<String?>(null)
@@ -89,8 +92,9 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
         mainPageViewModel.checkFavorite()
         mainPageViewModel.getDetails()
         mainPageViewModel.getVideos()
-        mainPageViewModel.getCredits()
     }
+
+
 
     detailItemState.value?.let {
         val tabItems = remember { listOf("Actors", "Similar Movies") }
@@ -98,6 +102,17 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
         var selectedIndex by remember {
             mutableIntStateOf(0)
         }
+
+        LaunchedEffect(key1 = selectedIndex ){
+            if(selectedIndex== 0 && creditItemState.value == null ){
+                mainPageViewModel.getCredits()
+            }
+            else{
+                mainPageViewModel.getSimilar()
+            }
+
+        }
+
         val (hours, remainingMinutes) = convertToHours(it.runtime!!)
 
 
@@ -193,7 +208,7 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
                 }
                   item{GenresViewItem(genreName = "${hours}h ${remainingMinutes}m")}
 
-                item{ Icon(imageVector = if(favoriteFilm.value is NetworkState.Success) Icons.Rounded.Favorite  else Icons.Rounded.FavoriteBorder , contentDescription =null,tint= if(favoriteFilm.value is NetworkState.Success) Color.Red else Color.White , modifier = Modifier
+                item{ Icon(imageVector = if(isFavoriteFilm) Icons.Rounded.Favorite  else Icons.Rounded.FavoriteBorder , contentDescription =null,tint= if(isFavoriteFilm) Color.Red else Color.White , modifier = Modifier
                     .size(36.dp)
                     .clickable {
                         it.id?.let { movieId ->
@@ -239,76 +254,118 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
             TextSwitch(
                 selectedIndex = selectedIndex,
                 items = tabItems,
-                onSelection = { selectedIndex = it })
+                onSelection = {
+                    selectedIndex = it
+                })
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.padding(start = 14.dp, top = 14.dp)
             ) {
-                creditItemState.value?.cast?.let { creditItem ->
-                    items(items = creditItem) { credit ->
-                        ActorsItem(image = IMAGE_URL + credit!!.profilePath)
+                if (selectedIndex == 0){
+                    creditItemState.value?.cast?.let { creditItem ->
+                        items(items = creditItem) { credit ->
+                            ActorsItem(image = IMAGE_URL + credit!!.profilePath)
+                        }
                     }
+            }
+                else{
+                    similarItemState.value?.results?.let{similarItem->
+                        items(items = similarItem) { similar ->
+                            ActorsItem(image = IMAGE_URL + similar!!.posterPath)
+                        }
+
+
+
+                    }
+
                 }
             }
 
             Spacer(modifier = Modifier.height(100.dp))
         }
 
-        when (val response =favoriteFilm.value) {
-            is NetworkState.Loading -> {
-
-            }
-
-            is NetworkState.Success -> {
-
-                 isFavoriteFilm=true
-
-
-            }
-
-            is NetworkState.Error -> {
-                errorMessage =
-                    response.errorMessage ?: context.getString(R.string.error_message)
-
-                Toast.makeText(
-                    context,
-                    errorMessage, Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            else -> {}
-        }
-
-        when (val response =checkFavoriteState.value) {
-            is NetworkState.Loading -> {
-
-            }
-
-            is NetworkState.Success -> {
-
-               isFavoriteFilm=true
-                mainPageViewModel.resetFavorite()
-
-
-            }
-
-            is NetworkState.Error -> {
-                errorMessage =
-                    response.errorMessage ?: context.getString(R.string.error_message)
-
-                Toast.makeText(
-                    context,
-                    errorMessage, Toast.LENGTH_SHORT
-                ).show()
-            }
-
-            else -> {}
-        }
-
-
-
     }
+    when (val response =favoriteFilm.value) {
+        is NetworkState.Loading -> {
+
+        }
+
+        is NetworkState.Success -> {
+
+            isFavoriteFilm=true
+            mainPageViewModel.resetAddFavoriteState()
+
+
+        }
+
+        is NetworkState.Error -> {
+            errorMessage =
+                response.errorMessage ?: context.getString(R.string.error_message)
+
+            Toast.makeText(
+                context,
+                errorMessage, Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        else -> {}
+    }
+
+    when (val response =checkFavoriteState.value) {
+        is NetworkState.Loading -> {
+
+        }
+
+        is NetworkState.Success -> {
+
+            isFavoriteFilm= response.data
+            mainPageViewModel.resetFavorite()
+
+
+        }
+
+        is NetworkState.Error -> {
+            errorMessage =
+                response.errorMessage ?: context.getString(R.string.error_message)
+
+            Toast.makeText(
+                context,
+                errorMessage, Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        else -> {}
+    }
+
+    when (val response =removeFavoriteState.value) {
+        is NetworkState.Loading -> {
+
+        }
+
+        is NetworkState.Success -> {
+
+            isFavoriteFilm= false
+            mainPageViewModel.resetRemoveFavoriteState()
+
+
+        }
+
+        is NetworkState.Error -> {
+            errorMessage =
+                response.errorMessage ?: context.getString(R.string.error_message)
+
+            Toast.makeText(
+                context,
+                errorMessage, Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        else -> {}
+    }
+
+
+
 }
 fun convertToHours(minutes: Int): Pair<Int, Int> {
     val hours = minutes / 60

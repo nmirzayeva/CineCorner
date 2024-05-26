@@ -70,14 +70,15 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 
 
 @Composable
-fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostController) {
+fun DetailScreen(mainPageViewModel: MainPageViewModel, navController: NavHostController) {
     val detailItemState = mainPageViewModel.detailPageResponse.collectAsState()
     val videoItemState = mainPageViewModel.videoListResponse.collectAsState()
     val creditItemState = mainPageViewModel.creditListResponse.collectAsState()
-    val similarItemState=mainPageViewModel.similarListResponse.collectAsState()
-    val favoriteFilm=mainPageViewModel.addFavoriteFilms.collectAsState()
-    val checkFavoriteState=mainPageViewModel.checkFavoriteResponse.collectAsState()
-    val removeFavoriteState=mainPageViewModel.removeFavoriteResponse.collectAsState()
+    val similarItemState = mainPageViewModel.similarListResponse.collectAsState()
+
+    val favoriteFilm = mainPageViewModel.addFavoriteFilms.collectAsState()
+    val checkFavoriteState = mainPageViewModel.checkFavoriteResponse.collectAsState()
+    val removeFavoriteState = mainPageViewModel.removeFavoriteResponse.collectAsState()
 
 
     var errorMessage by remember {
@@ -103,11 +104,10 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
             mutableIntStateOf(0)
         }
 
-        LaunchedEffect(key1 = selectedIndex ){
-            if(selectedIndex== 0 && creditItemState.value == null ){
+        LaunchedEffect(key1 = selectedIndex) {
+            if (selectedIndex == 0 && creditItemState.value == null) {
                 mainPageViewModel.getCredits()
-            }
-            else{
+            } else {
                 mainPageViewModel.getSimilar()
             }
 
@@ -124,7 +124,7 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
         ) {
 
 
-            when (val response=videoItemState.value) {
+            when (val response = videoItemState.value) {
                 is NetworkState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
@@ -191,47 +191,55 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
                 }
             }
 
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp),modifier=Modifier.padding(start=10.dp,end=10.dp,top=10.dp)) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 10.dp)
+            ) {
                 it.genres?.forEachIndexed { index, genre ->
                     when (index) {
                         0 -> {
-                            item { GenresViewItem(genreName = genre?.name.toString())}
+                            item { GenresViewItem(genreName = genre?.name.toString()) }
                         }
 
 
                         1 -> {
-                           item{ GenresViewItem(genreName = genre?.name.toString())}
+                            item { GenresViewItem(genreName = genre?.name.toString()) }
                         }
 
                     }
 
                 }
-                  item{GenresViewItem(genreName = "${hours}h ${remainingMinutes}m")}
+                item { GenresViewItem(genreName = "${hours}h ${remainingMinutes}m") }
 
-                item{ Icon(imageVector = if(isFavoriteFilm) Icons.Rounded.Favorite  else Icons.Rounded.FavoriteBorder , contentDescription =null,tint= if(isFavoriteFilm) Color.Red else Color.White , modifier = Modifier
-                    .size(36.dp)
-                    .clickable {
-                        it.id?.let { movieId ->
-                            if (!isFavoriteFilm) {
-                                mainPageViewModel.addFavorite(
-                                    FavoriteFilm(
-                                        id = movieId,
-                                        userId = mainPageViewModel.userId,
-                                        title = it.title ?: "No Title",
-                                        posterPath = it.posterPath,
-                                        voteAverage = it.voteAverage as Double
-                                    )
-                                )
-                            } else {
-                                mainPageViewModel.removeFavorite()
+                item {
+                    Icon(imageVector = if (isFavoriteFilm) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                        contentDescription = null,
+                        tint = if (isFavoriteFilm) Color.Red else Color.White,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clickable {
+                                it.id?.let { movieId ->
+                                    if (!isFavoriteFilm) {
+                                        mainPageViewModel.addFavorite(
+                                            FavoriteFilm(
+                                                id = movieId,
+                                                userId = mainPageViewModel.userId,
+                                                title = it.title ?: "No Title",
+                                                posterPath = it.posterPath,
+                                                voteAverage = it.voteAverage as Double
+                                            )
+                                        )
+                                    } else {
+                                        mainPageViewModel.removeFavorite()
+                                    }
+                                }
+
+
                             }
-                        }
 
 
-                    }
-
-
-                )}
+                    )
+                }
 
             }
 
@@ -262,19 +270,17 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.padding(start = 14.dp, top = 14.dp)
             ) {
-                if (selectedIndex == 0){
+                if (selectedIndex == 0) {
                     creditItemState.value?.cast?.let { creditItem ->
                         items(items = creditItem) { credit ->
                             ActorsItem(image = IMAGE_URL + credit!!.profilePath)
                         }
                     }
-            }
-                else{
-                    similarItemState.value?.results?.let{similarItem->
+                } else {
+                    similarItemState.value?.results?.let { similarItem ->
                         items(items = similarItem) { similar ->
                             ActorsItem(image = IMAGE_URL + similar!!.posterPath)
                         }
-
 
 
                     }
@@ -286,14 +292,14 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
         }
 
     }
-    when (val response =favoriteFilm.value) {
+    when (val response = favoriteFilm.value) {
         is NetworkState.Loading -> {
 
         }
 
         is NetworkState.Success -> {
 
-            isFavoriteFilm=true
+            isFavoriteFilm = true
             mainPageViewModel.resetAddFavoriteState()
 
 
@@ -312,14 +318,14 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
         else -> {}
     }
 
-    when (val response =checkFavoriteState.value) {
+    when (val response = checkFavoriteState.value) {
         is NetworkState.Loading -> {
 
         }
 
         is NetworkState.Success -> {
 
-            isFavoriteFilm= response.data
+            isFavoriteFilm = response.data
             mainPageViewModel.resetFavorite()
 
 
@@ -338,14 +344,14 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
         else -> {}
     }
 
-    when (val response =removeFavoriteState.value) {
+    when (val response = removeFavoriteState.value) {
         is NetworkState.Loading -> {
 
         }
 
         is NetworkState.Success -> {
 
-            isFavoriteFilm= false
+            isFavoriteFilm = false
             mainPageViewModel.resetRemoveFavoriteState()
 
 
@@ -365,8 +371,8 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCont
     }
 
 
-
 }
+
 fun convertToHours(minutes: Int): Pair<Int, Int> {
     val hours = minutes / 60
     val remainingMinutes = minutes % 60
@@ -413,7 +419,7 @@ fun YouTubePlayer(youtubeVideoId: String, lifeCycleOwner: LifecycleOwner) {
 }
 
 @Composable
-fun GenresViewItem(genreName:String) {
+fun GenresViewItem(genreName: String) {
     Box(
         modifier = Modifier
             .width(100.dp)

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -50,6 +51,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.model.ResultsItem
+import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
 import com.nurlanamirzayeva.gamejet.ui.activities.mainpage.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.SearchBar
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
@@ -68,6 +70,15 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
     val upcomingMoviesState = mainPageViewModel.upcomingMovieResponse.collectAsState()
     val profileItemState = mainPageViewModel.profileInfo.collectAsState()
 
+    val removeHistoryState = mainPageViewModel.removeHistoryResponse.collectAsState()
+    val historyFilm = mainPageViewModel.addHistory.collectAsState()
+    val checkHistoryState = mainPageViewModel.checkHistoryResponse.collectAsState()
+
+
+    var isHistoryFilm by remember {
+        mutableStateOf(false)
+    }
+
     var errorMessage by remember {
         mutableStateOf<String?>(null)
     }
@@ -78,6 +89,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
         mainPageViewModel.getMovieList()
         mainPageViewModel.getTrendingNow()
         mainPageViewModel.getUpcomingMovies()
+        mainPageViewModel.checkHistory()
     }
 
     Column(
@@ -145,10 +157,12 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
         Icon(imageVector = Icons.Rounded.Search,
             contentDescription =null,
             tint=Color.White,
-            modifier=Modifier.size(40.dp).clickable {
-                navController.navigate(Screens.Search)
+            modifier= Modifier
+                .size(40.dp)
+                .clickable {
+                    navController.navigate(Screens.Search)
 
-              } )
+                } )
 
 
         Row(
@@ -186,9 +200,22 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                         Log.d("TAG", "MainPage:${movie.id} ")
                         movie.id?.let { movieId ->
                             mainPageViewModel.movieId.intValue = movieId
-                            navController.navigate(Screens.Detail)
-                        }
+                            if (!isHistoryFilm) {
+                                mainPageViewModel.addHistory(
+                                    FavoriteFilm(
+                                        id = movieId,
+                                        userId = mainPageViewModel.userId,
+                                        title = movie.title ?: "No Title",
+                                        posterPath = movie.posterPath,
+                                        voteAverage = movie.voteAverage as Double
+                                    )
+                                )
+                            } else {
+                                mainPageViewModel.removeHistory()
+                            }
 
+                        }
+                        navController.navigate(Screens.Detail)
                     })
 
                 }
@@ -233,8 +260,24 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                     MovieItems(imageUrl = IMAGE_URL + movie.posterPath, onClick = {
                         movie.id?.let { movieId ->
                             mainPageViewModel.movieId.intValue = movieId
+                            if (!isHistoryFilm) {
+                                mainPageViewModel.addHistory(
+                                    FavoriteFilm(
+                                        id = movieId,
+                                        userId = mainPageViewModel.userId,
+                                        title = movie.title ?: "No Title",
+                                        posterPath = movie.posterPath,
+                                        voteAverage = movie.voteAverage as Double
+                                    )
+                                )
+                            } else {
+                                mainPageViewModel.removeHistory()
+                            }
+
+
                         }
                         navController.navigate(route = Screens.Detail)
+
                     })
 
                 }
@@ -277,11 +320,26 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
                 items(items = upcomingList) { upcoming ->
 
-                    MovieItems(imageUrl = IMAGE_URL + upcoming!!.posterPath, onClick = {
-                        upcoming.id?.let { upcomingId ->
+                    MovieItems(imageUrl = IMAGE_URL + upcoming?.posterPath, onClick = {
+                        upcoming?.id?.let { upcomingId ->
                             mainPageViewModel.movieId.intValue = upcomingId
+                            if (!isHistoryFilm) {
+                                mainPageViewModel.addHistory(
+                                    FavoriteFilm(
+                                        id = upcomingId,
+                                        userId = mainPageViewModel.userId,
+                                        title = upcoming.title ?: "No Title",
+                                        posterPath = upcoming.posterPath,
+                                        voteAverage = upcoming.voteAverage as Double
+                                    )
+                                )
+                            } else {
+                                mainPageViewModel.removeHistory()
+                            }
+
                         }
                         navController.navigate(route = Screens.Detail)
+
                     })
 
                 }
@@ -289,11 +347,100 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
 
     }
 
 
+    when (val response = historyFilm.value) {
+        is NetworkState.Loading -> {
+
+        }
+
+        is NetworkState.Success -> {
+
+            isHistoryFilm = true
+            mainPageViewModel.resetAddHistoryState()
+
+
+        }
+
+        is NetworkState.Error -> {
+            errorMessage =
+                response.errorMessage ?: context.getString(R.string.error_message)
+
+            Toast.makeText(
+                context,
+                errorMessage, Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        else -> {}
+    }
+
+
+    when (val response = checkHistoryState.value) {
+        is NetworkState.Loading -> {
+
+        }
+
+        is NetworkState.Success -> {
+
+            isHistoryFilm = response.data
+            mainPageViewModel.resetHistory()
+
+
+        }
+
+
+        is NetworkState.Error -> {
+            errorMessage =
+                response.errorMessage ?: context.getString(R.string.error_message)
+
+            Toast.makeText(
+                context,
+                errorMessage, Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        else -> {}
+    }
+
+
+    when (val response = removeHistoryState.value) {
+        is NetworkState.Loading -> {
+
+        }
+
+        is NetworkState.Success -> {
+
+            isHistoryFilm = false
+            mainPageViewModel.resetRemoveHistoryState()
+
+
+        }
+
+        is NetworkState.Error -> {
+            errorMessage =
+                response.errorMessage ?: context.getString(R.string.error_message)
+
+            Toast.makeText(
+                context,
+                errorMessage, Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        else -> {}
+    }
+
+
 }
+
+
+
+
+
+
 
 @Composable
 fun MovieItems(imageUrl: String, onClick: () -> Unit) {

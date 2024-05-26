@@ -109,6 +109,7 @@ fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageVie
                 modifier = Modifier
                     .size(40.dp)
                     .align(Alignment.BottomCenter)
+                    .clickable { navController.navigate(Screens.EditProfile) }
             )
         }
 
@@ -162,8 +163,6 @@ fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageVie
         }
 
 
-
-
         Text(
             "Account Settings",
             color = Color.Gray,
@@ -174,7 +173,7 @@ fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageVie
 
         accountSettingItems.forEach { accountSettingItem ->
 
-            ProfileItem(text = accountSettingItem, onClick = {navController.navigate(Screens.DarkMode)})
+            ProfileItem(text = accountSettingItem, onClick = {navController.navigate(Screens.History)})
         }
 
         Text(

@@ -44,6 +44,7 @@ import com.nurlanamirzayeva.gamejet.ui.components.BottomNavItems
 import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
+import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.haze.HazeState
@@ -64,6 +65,7 @@ class MainPageActivity : ComponentActivity() {
         setContent {
             val mainPageViewModel = hiltViewModel<MainPageViewModel>()
             val settingsViewModel = hiltViewModel<SettingsViewModel>()
+            val viewModel = hiltViewModel<RegisterViewModel>()
             navController = rememberNavController()
 
             GameJetTheme(settingsViewModel) {
@@ -71,10 +73,10 @@ class MainPageActivity : ComponentActivity() {
 
                 val navBackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackEntry?.destination?.route
-                var selectedTabIndex by remember { mutableIntStateOf(1) }
+                var selectedTabIndex by remember { mutableIntStateOf(0) }
                 val hazeState = remember { HazeState() }
                 Scaffold(containerColor = dark_grey, bottomBar = {
-                    if(currentRoute in listOf(Screens.MainPage,Screens.Profile)) {
+                    if(currentRoute in listOf(Screens.MainPage,Screens.Profile,Screens.Favorite)) {
 
                         Box(
                             modifier = Modifier
@@ -160,7 +162,7 @@ class MainPageActivity : ComponentActivity() {
                             .fillMaxSize(),
                     ) {
                         MainPageNavGraph(
-                            navController = navController, mainPageViewModel = mainPageViewModel,settingsViewModel=settingsViewModel
+                            navController = navController, mainPageViewModel = mainPageViewModel,settingsViewModel=settingsViewModel, viewModel = viewModel
                         )
                     }
                 }

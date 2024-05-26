@@ -1,5 +1,6 @@
 package com.nurlanamirzayeva.gamejet.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +12,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.google.firebase.auth.FirebaseAuth
+import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.model.CreditsResponse
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.paging.DiscoverPagingSource
@@ -25,7 +27,9 @@ import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
 import com.nurlanamirzayeva.gamejet.paging.SearchPagingSource
 import com.nurlanamirzayeva.gamejet.paging.TrendingPagingSource
 import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
+import com.nurlanamirzayeva.gamejet.utils.CONFIRM_PASSWORD
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
+import com.nurlanamirzayeva.gamejet.utils.PASSWORD
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -69,9 +73,20 @@ class MainPageViewModel @Inject constructor(
     private val _checkFavoriteResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
     val checkFavoriteResponse=_checkFavoriteResponse.asStateFlow()
 
+    private val _checkHistoryResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
+    val checkHistoryResponse= _checkHistoryResponse.asStateFlow()
+
     private val _removeFavoriteResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
     val removeFavoriteResponse=_removeFavoriteResponse.asStateFlow()
 
+    private val _removeHistoryResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
+    val removeHistoryResponse=_removeHistoryResponse.asStateFlow()
+
+    private val _getFavoriteResponse:MutableStateFlow<NetworkState<List<FavoriteFilm>>?> = MutableStateFlow(null)
+    val getFavoriteResponse=_getFavoriteResponse.asStateFlow()
+
+    private val _getHistoryResponse:MutableStateFlow<NetworkState<List<FavoriteFilm>>?> = MutableStateFlow(null)
+    val getHistoryResponse= _getHistoryResponse.asStateFlow()
 
     var errorMessage: String by mutableStateOf("")
 
@@ -86,6 +101,16 @@ class MainPageViewModel @Inject constructor(
     private val _addFavoriteFilms=MutableStateFlow<NetworkState<Boolean>?>(null)
     val addFavoriteFilms = _addFavoriteFilms.asStateFlow()
 
+    private val _addHistory=MutableStateFlow<NetworkState<Boolean>?>(null)
+    val addHistory = _addHistory.asStateFlow()
+
+    private val _updatePasswordResponse: MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
+    val updatePasswordResponse = _updatePasswordResponse.asStateFlow()
+
+    private val _updateUserProfileResponse: MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
+    val updateUserProfileResponse = _updateUserProfileResponse.asStateFlow()
+
+
     val userId= auth.currentUser?.uid ?: "unknown"
 
     var searchQuery = MutableStateFlow("")
@@ -93,6 +118,8 @@ class MainPageViewModel @Inject constructor(
 
     private val _searchResults = MutableStateFlow<PagingData<ResultsItem>>(PagingData.empty())
     val  searchResults:StateFlow<PagingData<ResultsItem>> =_searchResults.asStateFlow()
+
+
 
 
     @OptIn(FlowPreview::class)
@@ -109,7 +136,6 @@ class MainPageViewModel @Inject constructor(
                 .collectLatest { _searchResults.value = it }
         }
     }
-
 
 
 
@@ -133,17 +159,56 @@ class MainPageViewModel @Inject constructor(
     }
 
 
+    fun addHistory(film: FavoriteFilm) {
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.addHistory(film).collectLatest {state->
+                _addHistory.value=state
+
+            }
+        }
+    }
+
+    fun getFavoriteFilms(){
+        viewModelScope.launch(Dispatchers.IO) {
+            _getFavoriteResponse.value=NetworkState.Loading()
+            mainPageRepository.getFavoriteFilms(movieId.intValue).collectLatest {state->
+                _getFavoriteResponse.value=state
+            }
+        }
+
+    }
+
+
+    fun getHistory(){
+        viewModelScope.launch(Dispatchers.IO) {
+            _getHistoryResponse.value=NetworkState.Loading()
+            mainPageRepository.getHistory(movieId.intValue).collectLatest {state->
+                _getHistoryResponse.value=state
+            }
+        }
+
+    }
+
     fun addFavoriteLocal(film: FavoriteFilm) {
         viewModelScope.launch(Dispatchers.IO) {
             mainPageRepository.addFavoriteLocal(film)
         }
     }
 
-    fun removeFavorite() {
+    fun removeFavorite(removeMovieId:Int?=null) {
         viewModelScope.launch(Dispatchers.IO) {
-         mainPageRepository.removeFavoriteFilm(movieId.intValue).collectLatest {state->
+         mainPageRepository.removeFavoriteFilm(removeMovieId?:movieId.intValue).collectLatest {state->
              _removeFavoriteResponse.value=state
          }
+        }
+    }
+
+
+    fun removeHistory(removeMovieId:Int?=null) {
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.removeHistory(removeMovieId?:movieId.intValue).collectLatest {state->
+                _removeHistoryResponse.value=state
+            }
         }
     }
 
@@ -156,17 +221,67 @@ class MainPageViewModel @Inject constructor(
         }
 
     }
+
+    fun checkHistory(){
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.checkHistoryFilm(movieId.intValue).collectLatest {state->
+                _checkHistoryResponse.value=state
+
+            }
+        }
+
+    }
+
+
+
+    fun updateUserProfile(context: Context, name: String, email: String, newPassword:String, newConfirmPassword:String) {
+        _updateUserProfileResponse.value = NetworkState.Loading()
+
+        if (newPassword!= newConfirmPassword) {
+            _updateUserProfileResponse.value =
+                NetworkState.Error(context.getString(R.string.error_message))
+            return
+        }
+
+
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.updateUserProfile(name, email,newPassword,newConfirmPassword).collectLatest { state ->
+                _updateUserProfileResponse.value = state
+            }
+        }
+    }
+
+
     fun resetFavorite() {
         _checkFavoriteResponse.value = null
     }
+
+    fun resetHistory() {
+        _checkHistoryResponse.value = null
+    }
+
 
     fun resetRemoveFavoriteState() {
         _removeFavoriteResponse.value = null
     }
 
+
+    fun resetRemoveHistoryState() {
+        _removeHistoryResponse.value = null
+    }
+
     fun resetAddFavoriteState() {
         _addFavoriteFilms.value = null
     }
+
+    fun resetAddHistoryState() {
+        _addHistory.value = null
+    }
+
+    fun resetEditProfile() {
+        _updateUserProfileResponse.value = null
+    }
+
 
     fun getMovieList() {
 

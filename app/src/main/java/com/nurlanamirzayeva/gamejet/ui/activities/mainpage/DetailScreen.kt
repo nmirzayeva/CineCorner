@@ -80,6 +80,9 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel, navController: NavHostCon
     val checkFavoriteState = mainPageViewModel.checkFavoriteResponse.collectAsState()
     val removeFavoriteState = mainPageViewModel.removeFavoriteResponse.collectAsState()
 
+    val checkHistoryState = mainPageViewModel.checkHistoryResponse.collectAsState()
+
+
 
     var errorMessage by remember {
         mutableStateOf<String?>(null)
@@ -91,6 +94,7 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel, navController: NavHostCon
 
     LaunchedEffect(key1 = mainPageViewModel.movieId.intValue) {
         mainPageViewModel.checkFavorite()
+        mainPageViewModel.checkHistory()
         mainPageViewModel.getDetails()
         mainPageViewModel.getVideos()
     }
@@ -369,6 +373,50 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel, navController: NavHostCon
 
         else -> {}
     }
+
+
+    Log.d("TAG", "DetailScreen: state of check history ${checkHistoryState.value}")
+    when (val response = checkHistoryState.value) {
+        is NetworkState.Loading -> {
+
+        }
+
+        is NetworkState.Success -> {
+
+            LaunchedEffect(key1 = Unit) {
+                if (!response.data) {
+                    mainPageViewModel.addHistory(
+                        FavoriteFilm(
+                            id = mainPageViewModel.movieId.intValue,
+                            userId = mainPageViewModel.userId,
+                            title = detailItemState.value?.title ?: "No Title",
+                            posterPath = detailItemState.value?.posterPath,
+                            voteAverage =detailItemState.value?.voteAverage as Double
+                        )
+                    )
+                } else {
+                    // mainPageViewModel.removeHistory()
+                }
+            }
+            mainPageViewModel.resetHistory()
+
+
+        }
+
+
+        is NetworkState.Error -> {
+            errorMessage =
+                response.errorMessage ?: context.getString(R.string.error_message)
+
+            Toast.makeText(
+                context,
+                errorMessage, Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        else -> {}
+    }
+
 
 
 }

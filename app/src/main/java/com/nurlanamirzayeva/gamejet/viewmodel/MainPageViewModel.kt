@@ -216,7 +216,6 @@ class MainPageViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             mainPageRepository.checkFavoriteFilm(movieId.intValue).collectLatest {state->
                 _checkFavoriteResponse.value=state
-
             }
         }
 
@@ -226,7 +225,6 @@ class MainPageViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             mainPageRepository.checkHistoryFilm(movieId.intValue).collectLatest {state->
                 _checkHistoryResponse.value=state
-
             }
         }
 

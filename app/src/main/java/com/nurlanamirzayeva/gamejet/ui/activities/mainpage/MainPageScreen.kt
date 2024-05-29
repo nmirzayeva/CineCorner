@@ -71,13 +71,9 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
     val profileItemState = mainPageViewModel.profileInfo.collectAsState()
 
     val removeHistoryState = mainPageViewModel.removeHistoryResponse.collectAsState()
-    val historyFilm = mainPageViewModel.addHistory.collectAsState()
-    val checkHistoryState = mainPageViewModel.checkHistoryResponse.collectAsState()
 
 
-    var isHistoryFilm by remember {
-        mutableStateOf(false)
-    }
+
 
     var errorMessage by remember {
         mutableStateOf<String?>(null)
@@ -85,11 +81,9 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
     val context = LocalContext.current
 
     LaunchedEffect(key1 = Unit) {
-
         mainPageViewModel.getMovieList()
         mainPageViewModel.getTrendingNow()
         mainPageViewModel.getUpcomingMovies()
-        mainPageViewModel.checkHistory()
     }
 
     Column(
@@ -200,19 +194,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                         Log.d("TAG", "MainPage:${movie.id} ")
                         movie.id?.let { movieId ->
                             mainPageViewModel.movieId.intValue = movieId
-                            if (!isHistoryFilm) {
-                                mainPageViewModel.addHistory(
-                                    FavoriteFilm(
-                                        id = movieId,
-                                        userId = mainPageViewModel.userId,
-                                        title = movie.title ?: "No Title",
-                                        posterPath = movie.posterPath,
-                                        voteAverage = movie.voteAverage as Double
-                                    )
-                                )
-                            } else {
-                                mainPageViewModel.removeHistory()
-                            }
+
 
                         }
                         navController.navigate(Screens.Detail)
@@ -260,20 +242,6 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                     MovieItems(imageUrl = IMAGE_URL + movie.posterPath, onClick = {
                         movie.id?.let { movieId ->
                             mainPageViewModel.movieId.intValue = movieId
-                            if (!isHistoryFilm) {
-                                mainPageViewModel.addHistory(
-                                    FavoriteFilm(
-                                        id = movieId,
-                                        userId = mainPageViewModel.userId,
-                                        title = movie.title ?: "No Title",
-                                        posterPath = movie.posterPath,
-                                        voteAverage = movie.voteAverage as Double
-                                    )
-                                )
-                            } else {
-                                mainPageViewModel.removeHistory()
-                            }
-
 
                         }
                         navController.navigate(route = Screens.Detail)
@@ -323,19 +291,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                     MovieItems(imageUrl = IMAGE_URL + upcoming?.posterPath, onClick = {
                         upcoming?.id?.let { upcomingId ->
                             mainPageViewModel.movieId.intValue = upcomingId
-                            if (!isHistoryFilm) {
-                                mainPageViewModel.addHistory(
-                                    FavoriteFilm(
-                                        id = upcomingId,
-                                        userId = mainPageViewModel.userId,
-                                        title = upcoming.title ?: "No Title",
-                                        posterPath = upcoming.posterPath,
-                                        voteAverage = upcoming.voteAverage as Double
-                                    )
-                                )
-                            } else {
-                                mainPageViewModel.removeHistory()
-                            }
+
 
                         }
                         navController.navigate(route = Screens.Detail)
@@ -352,60 +308,6 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
     }
 
 
-    when (val response = historyFilm.value) {
-        is NetworkState.Loading -> {
-
-        }
-
-        is NetworkState.Success -> {
-
-            isHistoryFilm = true
-            mainPageViewModel.resetAddHistoryState()
-
-
-        }
-
-        is NetworkState.Error -> {
-            errorMessage =
-                response.errorMessage ?: context.getString(R.string.error_message)
-
-            Toast.makeText(
-                context,
-                errorMessage, Toast.LENGTH_SHORT
-            ).show()
-        }
-
-        else -> {}
-    }
-
-
-    when (val response = checkHistoryState.value) {
-        is NetworkState.Loading -> {
-
-        }
-
-        is NetworkState.Success -> {
-
-            isHistoryFilm = response.data
-            mainPageViewModel.resetHistory()
-
-
-        }
-
-
-        is NetworkState.Error -> {
-            errorMessage =
-                response.errorMessage ?: context.getString(R.string.error_message)
-
-            Toast.makeText(
-                context,
-                errorMessage, Toast.LENGTH_SHORT
-            ).show()
-        }
-
-        else -> {}
-    }
-
 
     when (val response = removeHistoryState.value) {
         is NetworkState.Loading -> {
@@ -414,7 +316,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
         is NetworkState.Success -> {
 
-            isHistoryFilm = false
+
             mainPageViewModel.resetRemoveHistoryState()
 
 

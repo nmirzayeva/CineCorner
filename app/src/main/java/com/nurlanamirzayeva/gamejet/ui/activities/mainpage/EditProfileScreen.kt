@@ -1,5 +1,6 @@
 package com.nurlanamirzayeva.gamejet.ui.activities.mainpage
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -54,7 +55,6 @@ fun EditProfileScreen(viewModel:RegisterViewModel,mainPageViewModel: MainPageVie
     var username by remember { mutableStateOf(TextFieldValue()) }
     var confirmPassword by remember { mutableStateOf(TextFieldValue()) }
     val changeUserProfile = mainPageViewModel.updateUserProfileResponse.collectAsState()
-    val changePassword = mainPageViewModel.updatePasswordResponse.collectAsState()
 
 
     val context = LocalContext.current
@@ -237,7 +237,7 @@ fun EditProfileScreen(viewModel:RegisterViewModel,mainPageViewModel: MainPageVie
                         // perform the task
                         mainPageViewModel.updateUserProfile(
                             context=context,
-                           name = username.text,
+                            name = username.text,
                             email=email.text,
                             newPassword = password.text,
                             newConfirmPassword = confirmPassword.text
@@ -289,7 +289,8 @@ fun EditProfileScreen(viewModel:RegisterViewModel,mainPageViewModel: MainPageVie
             is NetworkState.Error -> {
 
 
-                Toast.makeText(context, "Invalid email or password", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Invalid email or password ->${response.errorMessage}", Toast.LENGTH_SHORT).show()
+                Log.d("TAG", "EditProfileScreen: ${response.errorMessage}")
                 mainPageViewModel.resetEditProfile()
             }
 

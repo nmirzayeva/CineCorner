@@ -1,6 +1,7 @@
 package com.nurlanamirzayeva.gamejet.viewmodel
 
 import android.content.Context
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -109,6 +110,9 @@ class MainPageViewModel @Inject constructor(
 
     private val _updateUserProfileResponse: MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
     val updateUserProfileResponse = _updateUserProfileResponse.asStateFlow()
+
+    private val _profileImageUploadState:MutableStateFlow<NetworkState<String>?> = MutableStateFlow(null)
+    val profileImageUploadState= _profileImageUploadState.asStateFlow()
 
 
     val userId= auth.currentUser?.uid ?: "unknown"
@@ -249,6 +253,15 @@ class MainPageViewModel @Inject constructor(
         }
     }
 
+    fun uploadProfileImage(uri: Uri){
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.uploadProfileImage(uri).collectLatest {state->
+                _profileImageUploadState.value=state
+
+            }
+        }
+
+    }
 
     fun resetFavorite() {
         _checkFavoriteResponse.value = null

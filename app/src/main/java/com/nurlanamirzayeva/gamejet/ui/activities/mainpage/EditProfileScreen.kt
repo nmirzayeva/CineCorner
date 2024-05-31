@@ -131,6 +131,7 @@ fun EditProfileScreen(viewModel:RegisterViewModel,mainPageViewModel: MainPageVie
                     )
                 }
 
+
                 Text(
                     "New username",
                     color = Color.White,

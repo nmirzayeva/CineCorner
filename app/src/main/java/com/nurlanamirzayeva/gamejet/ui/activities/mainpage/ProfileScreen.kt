@@ -1,6 +1,11 @@
 package com.nurlanamirzayeva.gamejet.ui.activities.mainpage
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,8 +18,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -44,30 +47,49 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseAuth
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.sky_blue
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
+import com.nurlanamirzayeva.gamejet.view.login.HomeActivity
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 
 
 @Composable
-fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageViewModel) {
+fun ProfileScreen(navController: NavHostController, mainPageViewModel: MainPageViewModel) {
 
-    val accountSettingItems = listOf<String>("Dark Mode", "History", "Lists", "Diary")
+    val accountSettingItems = listOf("Dark Mode", "History", "Edit Profile")
     val helpAndSupportAccounts =
-        listOf<String>("Privacy policy", "FAQ & Help", "Terms & Conditions")
+        listOf("Privacy policy", "FAQ & Help", "Terms & Conditions")
 
-    val profileItemState= mainPageViewModel.profileInfo.collectAsState()
+    val profileItemState = mainPageViewModel.profileInfo.collectAsState()
+    val profileImageUploadState = mainPageViewModel.profileImageUploadState.collectAsState()
+
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     var errorMessage by remember {
         mutableStateOf<String?>(null)
     }
     val context = LocalContext.current
 
-    LaunchedEffect(key1 = Unit){
+    LaunchedEffect(key1 = Unit) {
         mainPageViewModel.fetchUserData()
+
     }
+    val auth = FirebaseAuth.getInstance()
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            if (uri != null) {
+                selectedImageUri = uri
+                mainPageViewModel.uploadProfileImage(uri)
+            }
+        }
+    )
+
+
 
     Column(
         modifier = Modifier
@@ -88,19 +110,43 @@ fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageVie
                 .fillMaxWidth()
                 .padding(horizontal = 18.dp)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.pp),
-                contentDescription = "Profile",
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .padding(top = 18.dp, bottom = 14.dp)
-                    .padding()
-                    .size(120.dp)
-                    .clip(
-                        CircleShape
+
+
+            when (val response=profileItemState.value) {
+
+                is NetworkState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(50.dp)
                     )
-                    .align(Alignment.Center)
-            )
+                }
+                is NetworkState.Success -> {
+
+                        AsyncImage(
+                            model = selectedImageUri?:response.data.profileImage,
+                            contentDescription = "Profile",
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier
+                                .padding(top = 18.dp, bottom = 14.dp)
+                                .padding()
+                                .size(120.dp)
+                                .clip(CircleShape)
+                                .align(Alignment.Center)
+                        )
+
+                }
+
+                is NetworkState.Error -> {
+                    Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show()
+                }
+
+                null -> {}
+
+            }
+
+
+
 
             Icon(
                 imageVector = Icons.Rounded.Edit,
@@ -109,12 +155,15 @@ fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageVie
                 modifier = Modifier
                     .size(40.dp)
                     .align(Alignment.BottomCenter)
-                    .clickable { navController.navigate(Screens.EditProfile) }
+                    .clickable {
+                        imagePickerLauncher.launch("image/*")
+                    }
+
             )
         }
 
 
-        when(val response=profileItemState.value){
+        when (val response = profileItemState.value) {
 
             is NetworkState.Loading -> {
                 CircularProgressIndicator(
@@ -124,9 +173,9 @@ fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageVie
                 )
             }
 
-            is NetworkState.Success-> {
+            is NetworkState.Success -> {
                 Text(
-                    text= response.data.profileName ?: "Unknown",
+                    text = response.data.profileName ?: "Unknown",
                     color = Color.White,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -135,7 +184,7 @@ fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageVie
                         .padding(top = 12.dp)
                 )
                 Text(
-                    text= response.data.profileEmail ?:"Unknown" ,
+                    text = response.data.profileEmail ?: "Unknown",
                     fontSize = 14.sp,
                     color = Color.Gray,
                     fontWeight = FontWeight.SemiBold,
@@ -171,10 +220,26 @@ fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageVie
             modifier = Modifier.padding(start = 14.dp, top = 40.dp)
         )
 
-        accountSettingItems.forEach { accountSettingItem ->
+        accountSettingItems.forEachIndexed { index, accountSettingItems ->
+            when (index) {
+                0 -> ProfileItem(
+                    text = accountSettingItems,
+                    onClick = { navController.navigate(Screens.DarkMode) })
 
-            ProfileItem(text = accountSettingItem, onClick = {navController.navigate(Screens.History)})
+                1 -> ProfileItem(
+                    text = accountSettingItems,
+                    onClick = { navController.navigate(Screens.History) })
+
+                2 -> ProfileItem(
+                    text = accountSettingItems,
+                    onClick = { navController.navigate(Screens.EditProfile) })
+
+
+            }
         }
+
+
+
 
         Text(
             "Help and Support",
@@ -193,20 +258,51 @@ fun ProfileScreen(navController:NavHostController,mainPageViewModel: MainPageVie
             color = Color.Red,
             fontWeight = FontWeight.SemiBold,
             fontSize = 24.sp,
-            modifier = Modifier.padding(start = 14.dp, top = 10.dp, bottom = 80.dp )
+            modifier = Modifier
+                .padding(start = 14.dp, top = 10.dp, bottom = 80.dp)
+                .clickable {
+                    auth.signOut()
+                    val intent = Intent(context, HomeActivity::class.java).apply {
+                        putExtra("SKIP_SPLASH", true)
+                    }
+                    context.startActivity(intent)
+                    (context as? Activity)?.finish()
+
+                }
         )
 
+
+
+        LaunchedEffect(profileImageUploadState.value) {
+            when (profileImageUploadState.value) {
+                is NetworkState.Loading -> {
+                    // Handle loading state
+                }
+                is NetworkState.Success -> {
+                    Toast.makeText(context, "Image uploaded successfully", Toast.LENGTH_SHORT).show()
+                }
+                is NetworkState.Error -> {
+                    Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show()
+                }
+                null -> {}
+            }
+        }
+
+
     }
+
+
 }
 
 @Composable
-fun ProfileItem(text: String,onClick: (() -> Unit) = {}) {
+fun ProfileItem(text: String, onClick: (() -> Unit) = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 2.dp)
             .background(color = dark_grey)
             .height(36.dp)
+            .clickable { onClick() }
     ) {
 
         Row(
@@ -223,7 +319,7 @@ fun ProfileItem(text: String,onClick: (() -> Unit) = {}) {
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .clickable { onClick() }
+
 
             )
             Icon(

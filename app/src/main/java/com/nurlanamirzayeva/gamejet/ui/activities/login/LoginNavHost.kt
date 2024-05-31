@@ -17,10 +17,11 @@ import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
 fun LoginNavGraph(
     navController: NavHostController,
     viewModel: RegisterViewModel,
-    auth:FirebaseAuth
+    auth:FirebaseAuth,
+    skipSplash:Boolean
 ) {
 
-    NavHost(navController = navController, startDestination = Screens.Splash) {
+    NavHost(navController = navController, startDestination = if(skipSplash)Screens.SignIn else  Screens.Splash) {
         composable(route="Splash"){
             SplashScreen(navController = navController, auth =auth  )
         }

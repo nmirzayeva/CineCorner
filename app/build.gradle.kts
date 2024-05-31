@@ -127,6 +127,7 @@ dependencies {
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-storage:20.0.1")
 
 
     //Coil
@@ -137,11 +138,15 @@ dependencies {
     implementation ("androidx.paging:paging-compose:3.3.0-alpha02")
     implementation("androidx.paging:paging-runtime:3.3.0-alpha02")
 
+    //Haze
     implementation("dev.chrisbanes.haze:haze-jetpack-compose:0.4.1")
 
+    // Youtube Player
     implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
 
+    //Lottie
     implementation ("com.airbnb.android:lottie-compose:6.3.0")
+
 
     //Tests
     testImplementation("junit:junit:4.13.2")

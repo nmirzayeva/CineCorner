@@ -1,11 +1,9 @@
 package com.nurlanamirzayeva.gamejet.network.repositories
 
-import android.util.Log
-import com.google.firebase.auth.EmailAuthProvider
+import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.firestore.FirebaseFirestore
-import com.nurlanamirzayeva.gamejet.model.DetailsResponse
+import com.google.firebase.storage.FirebaseStorage
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
 import com.nurlanamirzayeva.gamejet.model.ProfileItemDTO
 import com.nurlanamirzayeva.gamejet.model.UpcomingResponse
@@ -14,13 +12,10 @@ import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
 import com.nurlanamirzayeva.gamejet.room.FavoriteFilmDao
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import retrofit2.Response
 import javax.inject.Inject
-import kotlin.math.log
 
 
 class MainPageRepository @Inject constructor(
@@ -48,8 +43,8 @@ class MainPageRepository @Inject constructor(
             if (userDataSnapshot.isSuccessful) {
                 val name = userDataSnapshot.result.getString("user_name")
                 val email = userDataSnapshot.result.getString("email")
-
-                trySend(NetworkState.Success(ProfileItemDTO(name, email)))
+                val profileImage = userDataSnapshot.result.getString("profileImage")
+                trySend(NetworkState.Success(ProfileItemDTO(name, email, profileImage)))
             } else {
                 trySend(NetworkState.Error(errorMessage = null))
 
@@ -311,6 +306,66 @@ class MainPageRepository @Inject constructor(
         awaitClose {
             channel.close()
         }
+    }
+
+
+    suspend fun uploadProfileImage(profileImageUri: Uri) = callbackFlow<NetworkState<String>> {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            trySend(NetworkState.Error("User not authenticated"))
+            awaitClose { channel.close() }
+            return@callbackFlow
+        }
+
+        val userId = currentUser.uid
+        try {
+            val storageReference =
+                FirebaseStorage.getInstance().reference.child("profile_images/$userId")
+            storageReference.putFile(profileImageUri).await()
+            val imageUrl = storageReference.downloadUrl.await().toString()
+
+            val userRef = fireStore.collection("users").document(userId)
+            userRef.get().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    if (task.result.exists()) {
+                        userRef.update("profileImage", imageUrl).addOnSuccessListener {
+                            trySend(NetworkState.Success(imageUrl))
+                        }.addOnFailureListener { exception ->
+                            trySend(
+                                NetworkState.Error(
+                                    exception.localizedMessage
+                                        ?: "Failed to update profile image URL in Firestore"
+                                )
+                            )
+                        }
+                    } else {
+                        val userMap = hashMapOf("profileImage" to imageUrl)
+                        userRef.set(userMap).addOnSuccessListener {
+                            trySend(NetworkState.Success(imageUrl))
+                        }.addOnFailureListener { exception ->
+                            trySend(
+                                NetworkState.Error(
+                                    exception.localizedMessage
+                                        ?: "Failed to create user document with profile image URL in Firestore"
+                                )
+                            )
+                        }
+                    }
+                } else {
+                    trySend(
+                        NetworkState.Error(
+                            task.exception?.localizedMessage
+                                ?: "Failed to check if user document exists"
+                        )
+                    )
+                }
+            }.await()
+
+        } catch (e: Exception) {
+            trySend(NetworkState.Error(e.localizedMessage))
+        }
+
+        awaitClose { channel.close() }
     }
 
 

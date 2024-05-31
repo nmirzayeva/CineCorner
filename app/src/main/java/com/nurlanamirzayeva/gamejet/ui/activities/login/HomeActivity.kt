@@ -30,13 +30,14 @@ class HomeActivity : ComponentActivity() {
         setContent {
             val viewModel = hiltViewModel<RegisterViewModel>()
             val settingsViewModel = hiltViewModel<SettingsViewModel>()
+            val skipSplash = intent.getBooleanExtra("SKIP_SPLASH", false)
             navController = rememberNavController()
             GameJetTheme(settingsViewModel) {
 
                 Surface {
                     LoginNavGraph(
                         navController = navController,
-                        viewModel = viewModel, auth = auth
+                        viewModel = viewModel, auth = auth, skipSplash=skipSplash
                     )
                 }
             }

@@ -27,33 +27,43 @@ import javax.inject.Inject
 
 
 @Composable
-fun SplashScreen(navController: NavHostController,auth: FirebaseAuth) {
+fun SplashScreen(navController: NavHostController, auth: FirebaseAuth) {
     val context = LocalContext.current
+    val skipSplash = (context as? Activity)?.intent?.getBooleanExtra("SKIP_SPLASH", false) ?: false
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.primary),
-        contentAlignment = Alignment.Center
-    ) {
-        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.logo))
-        val logoAnimationState = animateLottieCompositionAsState(composition = composition)
-        LottieAnimation(
-            composition = composition,
-            progress = { logoAnimationState.progress },
-            modifier = Modifier.size(250.dp)
-        )
-        if (logoAnimationState.isAtEnd && logoAnimationState.isPlaying) {
-            if (auth.currentUser != null) {
-                val intent = Intent(context, MainPageActivity::class.java)
-                context.startActivity(intent)
-                (context as? Activity)?.finish()
-            } else {
-                navController.navigate(Screens.SignIn)
+    if (skipSplash) {
+        navController.navigate(Screens.SignIn) {
+            popUpTo(Screens.Splash) { inclusive = true }
+        }
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) {
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.logo))
+            val logoAnimationState = animateLottieCompositionAsState(composition = composition)
+            LottieAnimation(
+                composition = composition,
+                progress = { logoAnimationState.progress },
+                modifier = Modifier.size(250.dp)
+            )
+            if (logoAnimationState.isAtEnd && logoAnimationState.isPlaying) {
+                if (auth.currentUser != null) {
+                    val intent = Intent(context, MainPageActivity::class.java)
+                    context.startActivity(intent)
+                    (context as? Activity)?.finish()
+                } else {
+                    navController.navigate(Screens.SignIn) {
+                        popUpTo(Screens.Splash) { inclusive = true }
+                    }
+                }
             }
+
+
         }
 
     }
-
 }
 

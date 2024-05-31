@@ -149,7 +149,6 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
 
                 }
 
-
                 Button(
                     onClick = {
 
@@ -166,7 +165,6 @@ fun SignIn(navController: NavHostController, viewModel: RegisterViewModel) {
                         }
 
                     },
-
 
                     colors = ButtonDefaults.buttonColors(
                         containerColor = green

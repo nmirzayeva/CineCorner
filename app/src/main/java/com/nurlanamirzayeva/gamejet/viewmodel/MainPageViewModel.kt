@@ -20,13 +20,16 @@ import com.nurlanamirzayeva.gamejet.paging.DiscoverPagingSource
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
 import com.nurlanamirzayeva.gamejet.model.ProfileItemDTO
 import com.nurlanamirzayeva.gamejet.model.ResultsItem
+import com.nurlanamirzayeva.gamejet.model.ReviewsResponse
 import com.nurlanamirzayeva.gamejet.model.SimilarMoviesResponse
+import com.nurlanamirzayeva.gamejet.model.TrendingResponse
 import com.nurlanamirzayeva.gamejet.model.UpcomingResponse
 import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
 import com.nurlanamirzayeva.gamejet.paging.SearchPagingSource
 import com.nurlanamirzayeva.gamejet.paging.TrendingPagingSource
+import com.nurlanamirzayeva.gamejet.paging.UpcomingPagingSource
 import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
 import com.nurlanamirzayeva.gamejet.utils.CONFIRM_PASSWORD
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
@@ -53,7 +56,7 @@ class MainPageViewModel @Inject constructor(
         MutableStateFlow(null)
     val movieListResponse = _movieListResponse.asStateFlow()
 
-    private val _trendingMovieResponse: MutableStateFlow<DiscoverResponse?> = MutableStateFlow(null)
+    private val _trendingMovieResponse: MutableStateFlow<TrendingResponse?> = MutableStateFlow(null)
     val trendingMovieResponse = _trendingMovieResponse.asStateFlow()
 
     private val _upcomingMoviesResponse:MutableStateFlow<UpcomingResponse?> =MutableStateFlow(null)
@@ -70,6 +73,9 @@ class MainPageViewModel @Inject constructor(
 
     private val _similarListResponse:MutableStateFlow<SimilarMoviesResponse?> = MutableStateFlow(null)
     val similarListResponse=_similarListResponse.asStateFlow()
+
+    private val _reviewListResponse:MutableStateFlow<ReviewsResponse?> = MutableStateFlow(null)
+    val reviewListResponse=_reviewListResponse.asStateFlow()
 
     private val _checkFavoriteResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
     val checkFavoriteResponse=_checkFavoriteResponse.asStateFlow()
@@ -430,6 +436,20 @@ class MainPageViewModel @Inject constructor(
         }
     }
 
+    fun getReviews(){
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val reviewItems= detailPageRepository.getReviews(movieId.intValue)
+                _reviewListResponse.value= reviewItems.body()
+            }
+            catch(e:Exception){
+                errorMessage=e.message.toString()
+            }
+        }
+    }
+
+
 
     val discoverListPager = Pager(
 
@@ -444,15 +464,20 @@ class MainPageViewModel @Inject constructor(
     ).flow.cachedIn(viewModelScope)
 
 
-
-
-
-
     val trendingListPager = Pager(
         config = PagingConfig(pageSize = 20),
         initialKey = 1,
         pagingSourceFactory = {
             TrendingPagingSource(mainPageRepository)
+        }
+    ).flow.cachedIn(viewModelScope)
+
+
+    val upcomingListPager = Pager(
+        config = PagingConfig(pageSize = 20),
+        initialKey = 1,
+        pagingSourceFactory = {
+            UpcomingPagingSource(mainPageRepository)
         }
     ).flow.cachedIn(viewModelScope)
 

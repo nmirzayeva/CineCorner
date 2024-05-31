@@ -6,14 +6,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,52 +35,40 @@ import coil.compose.AsyncImage
 import com.nurlanamirzayeva.gamejet.ui.theme.black
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.grey
-import com.nurlanamirzayeva.gamejet.utils.BACKGROUND_URL
 import com.nurlanamirzayeva.gamejet.utils.IMAGE_URL
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 
 @Composable
 fun ViewAllDiscoverScreen(mainPageViewModel: MainPageViewModel, navController: NavHostController) {
-
     val discoverPageList = mainPageViewModel.discoverListPager.collectAsLazyPagingItems()
     val context = LocalContext.current
 
-
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+            .background(dark_grey)
+
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = grey)
-                .height(80.dp)
-        ) {
-
-
-            Text(
-                text = "List",
-                color = Color.White,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.SemiBold,
+        item {
+            Box(
                 modifier = Modifier
-                    .align(
-                        Alignment.CenterStart
-                    )
-                    .padding(start = 50.dp)
-            )
+                    .fillMaxWidth()
+                    .background(color = grey)
+                    .height(80.dp)
+            ) {
+                Text(
+                    text = "List",
+                    color = Color.White,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 50.dp)
+                )
+            }
         }
 
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = dark_grey), verticalArrangement = Arrangement.spacedBy(8.dp)
-
-
-        ) {
-
-
+        item {
             Text(
                 text = "Discover great movies for your Watchlist",
                 color = Color.White,
@@ -85,95 +76,72 @@ fun ViewAllDiscoverScreen(mainPageViewModel: MainPageViewModel, navController: N
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 20.dp)
             )
+        }
 
-
-
+        item {
             if (discoverPageList.itemSnapshotList.items.isNotEmpty()) {
-
-                LazyVerticalGrid(columns = GridCells.Fixed(4),
+                Box(
                     modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .fillMaxWidth(),
-
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-
-
-                    content = {
-
+                        .fillMaxWidth()
+                        .height(800.dp) // Adjust this height as needed
+                ) {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(4),
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         items(discoverPageList.itemCount) { index ->
                             DiscoverItem(
-                                imageUrl = IMAGE_URL + discoverPageList[index]!!.posterPath,
+                                imageUrl = IMAGE_URL + discoverPageList[index]?.posterPath.orEmpty(),
                                 onClick = {
-                                    discoverPageList[index]!!.id?.let { discoverId ->
+                                    discoverPageList[index]?.id?.let { discoverId ->
                                         mainPageViewModel.movieId.intValue = discoverId
-
+                                        navController.navigate(route = Screens.Detail)
                                     }
-                                    navController.navigate(route = Screens.Detail)
-
-                                })
+                                }
+                            )
                         }
 
-                        with(discoverPageList)
-
-                        {
+                        discoverPageList.apply {
                             when {
                                 loadState.refresh is LoadState.Loading -> {
-
                                     item {
                                         CircularProgressIndicator(
                                             modifier = Modifier
-                                                .align(Alignment.CenterHorizontally)
+                                                .align(Alignment.Center)
                                                 .size(50.dp),
                                             color = Color.White
                                         )
                                     }
                                 }
-
                                 loadState.refresh is LoadState.Error -> {
                                     Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
                                 }
-
-
                                 loadState.append is LoadState.Loading -> {
-
                                     item {
                                         CircularProgressIndicator(
                                             modifier = Modifier
-                                                .align(Alignment.CenterHorizontally)
+                                                .align(Alignment.Center)
                                                 .size(50.dp),
                                             color = Color.White
                                         )
                                     }
-
-
                                 }
-
                                 loadState.append is LoadState.Error -> {
                                     Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
                                 }
-
                             }
-
-
                         }
-
-
-                    })
-
+                    }
+                }
             }
-
         }
-
     }
-
 }
-
 
 @Composable
 fun DiscoverItem(imageUrl: String, onClick: () -> Unit = {}) {
-
-
     Box(
         modifier = Modifier
             .background(color = black)
@@ -181,15 +149,11 @@ fun DiscoverItem(imageUrl: String, onClick: () -> Unit = {}) {
             .width(100.dp)
             .clickable { onClick() }
     ) {
-
         AsyncImage(
-            model = imageUrl, contentDescription = null, modifier = Modifier
-
-                .fillMaxWidth(),
+            model = imageUrl,
+            contentDescription = null,
+            modifier = Modifier.fillMaxWidth(),
             contentScale = ContentScale.FillBounds
         )
-
     }
-
-
 }

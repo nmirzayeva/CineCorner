@@ -14,11 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,14 +32,13 @@ import coil.compose.AsyncImage
 import com.nurlanamirzayeva.gamejet.ui.theme.black
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.grey
-import com.nurlanamirzayeva.gamejet.utils.BACKGROUND_URL
 import com.nurlanamirzayeva.gamejet.utils.IMAGE_URL
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 
 @Composable
-fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel,navController:NavHostController) {
+fun ViewAllUpcomingScreen(mainPageViewModel: MainPageViewModel, navController: NavHostController) {
 
-    val trendingPageList = mainPageViewModel.trendingListPager.collectAsLazyPagingItems()
+    val upcomingPageList = mainPageViewModel.upcomingListPager.collectAsLazyPagingItems()
     val context = LocalContext.current
 
     Column(
@@ -80,7 +77,7 @@ fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel,navController:Nav
 
 
             Text(
-                text = "Discover trending movies for your Watchlist",
+                text = "Discover upcoming movies for your Watchlist",
                 color = Color.White,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -89,7 +86,7 @@ fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel,navController:Nav
 
 
 
-            if (trendingPageList.itemSnapshotList.items.isNotEmpty()) {
+            if (upcomingPageList.itemSnapshotList.items.isNotEmpty()) {
 
                 LazyVerticalGrid(columns = GridCells.Fixed(4),
                     modifier = Modifier
@@ -102,17 +99,19 @@ fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel,navController:Nav
 
                     content = {
 
-                        items(trendingPageList.itemCount) { index ->
-                            TrendingItem(imageUrl = IMAGE_URL + trendingPageList[index]!!.posterPath, onclick ={
-                                trendingPageList[index]?.id?.let{trendingId->
-                                    mainPageViewModel.movieId.intValue=trendingId
+                        items(upcomingPageList.itemCount) { index ->
+                            UpcomingItem(imageUrl = IMAGE_URL + upcomingPageList[index]!!.posterPath, onclick ={
+                                upcomingPageList[index]?.id?.let {upcomingId->
+                                    mainPageViewModel.movieId.intValue=upcomingId
                                     navController.navigate(Screens.Detail)
+
                                 }
 
-                            } )
+                            }
+                            )
                         }
 
-                        with(trendingPageList)
+                        with(upcomingPageList)
 
                         {
                             when {
@@ -162,7 +161,7 @@ fun ViewAllTrendingScreen(mainPageViewModel: MainPageViewModel,navController:Nav
 }
 
 @Composable
-fun TrendingItem(imageUrl: String,onclick:()->Unit={}) {
+fun UpcomingItem(imageUrl: String,onclick:()->Unit={}) {
 
 
     Box(

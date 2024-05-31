@@ -69,11 +69,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
     val trendingMoviesState = mainPageViewModel.trendingMovieResponse.collectAsState()
     val upcomingMoviesState = mainPageViewModel.upcomingMovieResponse.collectAsState()
     val profileItemState = mainPageViewModel.profileInfo.collectAsState()
-
     val removeHistoryState = mainPageViewModel.removeHistoryResponse.collectAsState()
-
-
-
 
     var errorMessage by remember {
         mutableStateOf<String?>(null)
@@ -239,8 +235,8 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
                 items(items = it) { movie ->
 
-                    MovieItems(imageUrl = IMAGE_URL + movie.posterPath, onClick = {
-                        movie.id?.let { movieId ->
+                    MovieItems(imageUrl = IMAGE_URL + movie?.posterPath, onClick = {
+                        movie?.id?.let { movieId ->
                             mainPageViewModel.movieId.intValue = movieId
 
                         }
@@ -275,7 +271,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                     .align(
                         Alignment.CenterVertically
                     )
-                    .clickable { navController.navigate(Screens.ViewAllTrending) }
+                    .clickable { navController.navigate(Screens.ViewAllUpcoming) }
             )
         }
 

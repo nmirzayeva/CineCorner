@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
 import com.nurlanamirzayeva.gamejet.model.ProfileItemDTO
+import com.nurlanamirzayeva.gamejet.model.TrendingResponse
 import com.nurlanamirzayeva.gamejet.model.UpcomingResponse
 import com.nurlanamirzayeva.gamejet.network.ApiService
 import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
@@ -25,8 +26,7 @@ class MainPageRepository @Inject constructor(
     private val favoriteFilmDao: FavoriteFilmDao
 ) {
     suspend fun getMovies(page: Int): Response<DiscoverResponse> = apiService.getMoviesByPage(page)
-    suspend fun getTrendingNow(page: Int): Response<DiscoverResponse> =
-        apiService.getTrendingNow(page)
+    suspend fun getTrendingNow(page: Int): Response<TrendingResponse> = apiService.getTrendingNow(page)
 
     suspend fun getUpcomingMovies(page: Int): Response<UpcomingResponse> =
         apiService.getUpcomingMovies(page)

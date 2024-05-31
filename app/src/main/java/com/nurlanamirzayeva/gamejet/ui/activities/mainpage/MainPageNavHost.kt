@@ -44,6 +44,10 @@ fun MainPageNavGraph(
 
             ViewAllTrendingScreen(mainPageViewModel = mainPageViewModel,navController=navController)
         }
+        composable(route = Screens.ViewAllUpcoming) {
+
+            ViewAllUpcomingScreen(mainPageViewModel = mainPageViewModel,navController=navController)
+        }
         composable(route=Screens.Profile){
             ProfileScreen(navController=navController,mainPageViewModel=mainPageViewModel)
             BackHandler(true) {
@@ -80,6 +84,7 @@ object Screens {
     const val Profile= "Profile"
     const val ViewAllDiscover = "ViewAllDiscover"
     const val ViewAllTrending = "ViewAllTrending"
+    const val ViewAllUpcoming = "ViewAllUpcoming"
     const val Detail="Detail"
     const val DarkMode="DarkMode"
     const val Favorite="Favorite"

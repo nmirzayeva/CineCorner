@@ -5,6 +5,7 @@ import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
 import com.nurlanamirzayeva.gamejet.model.ReviewsResponse
 import com.nurlanamirzayeva.gamejet.model.SimilarMoviesResponse
+import com.nurlanamirzayeva.gamejet.model.TrendingResponse
 import com.nurlanamirzayeva.gamejet.model.UpcomingResponse
 import com.nurlanamirzayeva.gamejet.model.Videos
 import com.nurlanamirzayeva.gamejet.utils.API_KEY
@@ -18,7 +19,7 @@ interface ApiService {
    suspend fun getMoviesByPage(@Query("page")page:Int =1):Response<DiscoverResponse>
 
    @GET("trending/movie/day?api_key=$API_KEY")
-   suspend fun getTrendingNow(@Query("page")page:Int=1):Response<DiscoverResponse>
+   suspend fun getTrendingNow(@Query("page")page:Int=1):Response<TrendingResponse>
 
    @GET("movie/upcoming?api_key=$API_KEY")
    suspend fun getUpcomingMovies(@Query("page")page:Int=1):Response<UpcomingResponse>

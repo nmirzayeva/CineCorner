@@ -43,6 +43,7 @@ import com.nurlanamirzayeva.gamejet.ui.components.BottomBarTabs
 import com.nurlanamirzayeva.gamejet.ui.components.BottomNavItems
 import com.nurlanamirzayeva.gamejet.ui.theme.GameJetTheme
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
+import com.nurlanamirzayeva.gamejet.viewmodel.ActorViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.SettingsViewModel
@@ -66,6 +67,7 @@ class MainPageActivity : ComponentActivity() {
             val mainPageViewModel = hiltViewModel<MainPageViewModel>()
             val settingsViewModel = hiltViewModel<SettingsViewModel>()
             val viewModel = hiltViewModel<RegisterViewModel>()
+            val actorPageViewModel= hiltViewModel<ActorViewModel>()
             navController = rememberNavController()
 
             GameJetTheme(settingsViewModel) {
@@ -162,7 +164,8 @@ class MainPageActivity : ComponentActivity() {
                             .fillMaxSize(),
                     ) {
                         MainPageNavGraph(
-                            navController = navController, mainPageViewModel = mainPageViewModel,settingsViewModel=settingsViewModel, viewModel = viewModel
+                            navController = navController, mainPageViewModel = mainPageViewModel,settingsViewModel=settingsViewModel, viewModel = viewModel,
+                            actorPageViewModel = actorPageViewModel
                         )
                     }
                 }

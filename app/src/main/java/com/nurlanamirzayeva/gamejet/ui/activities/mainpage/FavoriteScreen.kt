@@ -63,6 +63,7 @@ fun FavoriteScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCo
 
     val getFavoritesFilmsState = mainPageViewModel.getFavoriteResponse.collectAsState()
     val removeFavoriteState=mainPageViewModel.removeFavoriteResponse.collectAsState()
+ val favoriteFilmLocal=mainPageViewModel.favoriteFilms.collectAsState()
 
     val context = LocalContext.current
 
@@ -70,6 +71,7 @@ fun FavoriteScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCo
 
         mainPageViewModel.getFilmDetails()
         mainPageViewModel.getFavoriteFilms()
+        mainPageViewModel.getFavoriteLocal()
 
     }
 
@@ -104,12 +106,17 @@ fun FavoriteScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCo
 
                     is NetworkState.Error -> {
 
+                   favoriteFilmLocal.value.let {it->
 
-                        Toast.makeText(
-                            context,
-                            response.errorMessage ?: context.getString(R.string.error_message),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                       LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)){
+                           items(it) { favoriteFilm ->
+                               FavoriteItem(item = favoriteFilm)
+                           }
+                       }
+
+                   }
+
+
                     }
 
                     else -> {}
@@ -128,7 +135,6 @@ fun FavoriteScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCo
 
             }
 
-
             else -> {}
         }
 
@@ -139,7 +145,7 @@ fun FavoriteScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCo
 
 
 @Composable
-fun FavoriteItem(item: FavoriteFilm,onClick:()->Unit,onRemoveClick:()->Unit) {
+fun FavoriteItem(item: FavoriteFilm,onClick:()->Unit={},onRemoveClick:()->Unit={}) {
 
     Box(
         modifier = Modifier
@@ -176,7 +182,8 @@ fun FavoriteItem(item: FavoriteFilm,onClick:()->Unit,onRemoveClick:()->Unit) {
                     Alignment.TopEnd
                 )
                 .size(44.dp)
-                .padding(top = 10.dp, end = 10.dp).clickable { onRemoveClick() },
+                .padding(top = 10.dp, end = 10.dp)
+                .clickable { onRemoveClick() },
             tint = Color.White
 
 

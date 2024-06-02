@@ -13,6 +13,7 @@ import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
 import com.nurlanamirzayeva.gamejet.room.FavoriteFilmDao
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import retrofit2.Response
@@ -26,7 +27,8 @@ class MainPageRepository @Inject constructor(
     private val favoriteFilmDao: FavoriteFilmDao
 ) {
     suspend fun getMovies(page: Int): Response<DiscoverResponse> = apiService.getMoviesByPage(page)
-    suspend fun getTrendingNow(page: Int): Response<TrendingResponse> = apiService.getTrendingNow(page)
+    suspend fun getTrendingNow(page: Int): Response<TrendingResponse> =
+        apiService.getTrendingNow(page)
 
     suspend fun getUpcomingMovies(page: Int): Response<UpcomingResponse> =
         apiService.getUpcomingMovies(page)
@@ -44,6 +46,7 @@ class MainPageRepository @Inject constructor(
                 val name = userDataSnapshot.result.getString("user_name")
                 val email = userDataSnapshot.result.getString("email")
                 val profileImage = userDataSnapshot.result.getString("profileImage")
+
                 trySend(NetworkState.Success(ProfileItemDTO(name, email, profileImage)))
             } else {
                 trySend(NetworkState.Error(errorMessage = null))
@@ -251,9 +254,14 @@ class MainPageRepository @Inject constructor(
 
 
     suspend fun addFavoriteLocal(film: FavoriteFilm) {
-
         favoriteFilmDao.insertFavoriteFilm(film)
     }
+
+   suspend fun getFavoriteLocal(userId: String): Flow<List<FavoriteFilm>> {
+         return favoriteFilmDao.getFavoritesFilms(userId)
+    }
+
+
 
     suspend fun removeFavoriteLocal(film: FavoriteFilm) {
         favoriteFilmDao.deleteFavoriteFilm(film)
@@ -321,46 +329,51 @@ class MainPageRepository @Inject constructor(
         try {
             val storageReference =
                 FirebaseStorage.getInstance().reference.child("profile_images/$userId")
-            storageReference.putFile(profileImageUri).await()
-            val imageUrl = storageReference.downloadUrl.await().toString()
-
-            val userRef = fireStore.collection("users").document(userId)
-            userRef.get().addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    if (task.result.exists()) {
-                        userRef.update("profileImage", imageUrl).addOnSuccessListener {
-                            trySend(NetworkState.Success(imageUrl))
-                        }.addOnFailureListener { exception ->
-                            trySend(
-                                NetworkState.Error(
-                                    exception.localizedMessage
-                                        ?: "Failed to update profile image URL in Firestore"
+            storageReference.putFile(profileImageUri)
+                .addOnSuccessListener {
+                    storageReference.downloadUrl.addOnSuccessListener { uri ->
+                        val imageUrl = uri.toString()
+                        val userRef = fireStore.collection("users").document(userId)
+                        userRef.get().addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                if (task.result.exists()) {
+                                    userRef.update("profileImage", imageUrl).addOnSuccessListener {
+                                        trySend(NetworkState.Success(imageUrl))
+                                    }.addOnFailureListener { exception ->
+                                        trySend(
+                                            NetworkState.Error(
+                                                exception.localizedMessage
+                                                    ?: "Failed to update profile image URL in Firestore"
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    val userMap = hashMapOf("profileImage" to imageUrl)
+                                    userRef.set(userMap).addOnSuccessListener {
+                                        trySend(NetworkState.Success(imageUrl))
+                                    }.addOnFailureListener { exception ->
+                                        trySend(
+                                            NetworkState.Error(
+                                                exception.localizedMessage
+                                                    ?: "Failed to create user document with profile image URL in Firestore"
+                                            )
+                                        )
+                                    }
+                                }
+                            } else {
+                                trySend(
+                                    NetworkState.Error(
+                                        task.exception?.localizedMessage
+                                            ?: "Failed to check if user document exists"
+                                    )
                                 )
-                            )
-                        }
-                    } else {
-                        val userMap = hashMapOf("profileImage" to imageUrl)
-                        userRef.set(userMap).addOnSuccessListener {
-                            trySend(NetworkState.Success(imageUrl))
-                        }.addOnFailureListener { exception ->
-                            trySend(
-                                NetworkState.Error(
-                                    exception.localizedMessage
-                                        ?: "Failed to create user document with profile image URL in Firestore"
-                                )
-                            )
+                            }
                         }
                     }
-                } else {
-                    trySend(
-                        NetworkState.Error(
-                            task.exception?.localizedMessage
-                                ?: "Failed to check if user document exists"
-                        )
-                    )
                 }
-            }.await()
-
+                .addOnFailureListener { e ->
+                    trySend(NetworkState.Error(e.localizedMessage))
+                }
         } catch (e: Exception) {
             trySend(NetworkState.Error(e.localizedMessage))
         }

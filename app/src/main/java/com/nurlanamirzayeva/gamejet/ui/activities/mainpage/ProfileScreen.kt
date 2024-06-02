@@ -67,6 +67,7 @@ fun ProfileScreen(navController: NavHostController, mainPageViewModel: MainPageV
     val profileItemState = mainPageViewModel.profileInfo.collectAsState()
     val profileImageUploadState = mainPageViewModel.profileImageUploadState.collectAsState()
 
+
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     var errorMessage by remember {
@@ -124,7 +125,7 @@ fun ProfileScreen(navController: NavHostController, mainPageViewModel: MainPageV
                 is NetworkState.Success -> {
 
                         AsyncImage(
-                            model = selectedImageUri?:response.data.profileImage,
+                            model = response.data.profileImage,
                             contentDescription = "Profile",
                             contentScale = ContentScale.FillBounds,
                             modifier = Modifier

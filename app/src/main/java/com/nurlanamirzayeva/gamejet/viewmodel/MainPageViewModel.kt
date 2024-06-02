@@ -95,6 +95,9 @@ class MainPageViewModel @Inject constructor(
     private val _getHistoryResponse:MutableStateFlow<NetworkState<List<FavoriteFilm>>?> = MutableStateFlow(null)
     val getHistoryResponse= _getHistoryResponse.asStateFlow()
 
+    private val _favoriteFilms = MutableStateFlow<List<FavoriteFilm>>(emptyList())
+    val favoriteFilms= _favoriteFilms.asStateFlow()
+
     var errorMessage: String by mutableStateOf("")
 
     var movieId = mutableIntStateOf(0 )
@@ -120,11 +123,12 @@ class MainPageViewModel @Inject constructor(
     private val _profileImageUploadState:MutableStateFlow<NetworkState<String>?> = MutableStateFlow(null)
     val profileImageUploadState= _profileImageUploadState.asStateFlow()
 
+    private val _profileImageUrl: MutableStateFlow<String?> = MutableStateFlow(null)
+    val profileImageUrl: StateFlow<String?> = _profileImageUrl
 
     val userId= auth.currentUser?.uid ?: "unknown"
 
     var searchQuery = MutableStateFlow("")
-
 
     private val _searchResults = MutableStateFlow<PagingData<ResultsItem>>(PagingData.empty())
     val  searchResults:StateFlow<PagingData<ResultsItem>> =_searchResults.asStateFlow()
@@ -187,6 +191,7 @@ class MainPageViewModel @Inject constructor(
         }
 
     }
+
 
 
     fun getHistory(){
@@ -263,7 +268,9 @@ class MainPageViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             mainPageRepository.uploadProfileImage(uri).collectLatest {state->
                 _profileImageUploadState.value=state
-
+                if (state is NetworkState.Success) {
+                    _profileImageUrl.value = state.data
+                }
             }
         }
 
@@ -403,9 +410,28 @@ class MainPageViewModel @Inject constructor(
                     if(uid.isNotEmpty()) {
                         _profileInfo.value=state
                     }
+                    if (state is NetworkState.Success) {
+                        _profileImageUrl.value = state.data.profileImage
+                    }
                 }
             }
 
+
+        }
+    }
+
+    fun getFavoriteLocal(){
+        viewModelScope.launch(Dispatchers.IO) {
+      auth.currentUser?.uid?.let {uid->
+          mainPageRepository.getFavoriteLocal(uid).collectLatest {films->
+              _favoriteFilms.value=films
+
+          }
+
+
+
+
+}
 
         }
     }

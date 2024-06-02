@@ -14,6 +14,5 @@ class DetailPageRepository @Inject constructor(private val apiService: ApiServic
     suspend fun getVideos(movieId: Int):Response<Videos> = apiService.getVideos(movieId)
     suspend fun getCredits(movieId: Int):Response<CreditsResponse> =apiService.getCredits(movieId)
     suspend fun getSimilarMovies(movieId: Int):Response<SimilarMoviesResponse> =apiService.getSimilar(movieId)
-
     suspend fun getReviews(movieId: Int):Response<ReviewsResponse> =apiService.getReviews(movieId)
 }

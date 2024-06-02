@@ -1,9 +1,13 @@
 package com.nurlanamirzayeva.gamejet.view.mainpage
 
+import android.net.Uri
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,7 +42,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -70,17 +76,32 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
     val upcomingMoviesState = mainPageViewModel.upcomingMovieResponse.collectAsState()
     val profileItemState = mainPageViewModel.profileInfo.collectAsState()
     val removeHistoryState = mainPageViewModel.removeHistoryResponse.collectAsState()
+    val profileImageUploadState = mainPageViewModel.profileImageUploadState.collectAsState()
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+
 
     var errorMessage by remember {
         mutableStateOf<String?>(null)
     }
     val context = LocalContext.current
 
+
     LaunchedEffect(key1 = Unit) {
         mainPageViewModel.getMovieList()
         mainPageViewModel.getTrendingNow()
         mainPageViewModel.getUpcomingMovies()
+        mainPageViewModel.fetchUserData()
     }
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            if (uri != null) {
+                selectedImageUri = uri
+                mainPageViewModel.uploadProfileImage(uri)
+            }
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -90,69 +111,95 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(id = R.drawable.pp),
-                contentDescription = "Profile",
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .padding()
-                    .size(56.dp)
-                    .clip(
-                        CircleShape
-                    )
-
-            )
-
-            when (val response = profileItemState.value) {
-
-                is NetworkState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .size(50.dp)
-                    )
-                }
-
-                is NetworkState.Success -> {
-                    Text(
-                        "Hello, ${response.data.profileName ?: "Unknown"}!",
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(start = 24.dp, top = 6.dp)
-                    )
+            Row {
 
 
-                }
+                when (val response=profileItemState.value) {
 
-                is NetworkState.Error -> {
-                    errorMessage =
-                        response.errorMessage ?: context.getString(R.string.error_message)
+                    is NetworkState.Loading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .size(50.dp)
+                        )
+                    }
+                    is NetworkState.Success -> {
 
-                    Toast.makeText(
-                        context,
-                        errorMessage, Toast.LENGTH_SHORT
-                    ).show()
+                        AsyncImage(
+                            model = response.data.profileImage,
+                            contentDescription = "Profile",
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier
+                                .padding()
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .align(Alignment.CenterVertically)
+                        )
+
+                    }
+
+                    is NetworkState.Error -> {
+                        Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show()
+                    }
+
+                    null -> {}
 
                 }
 
-                null -> {}
+
+                when (val response = profileItemState.value) {
+
+                    is NetworkState.Loading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .size(50.dp)
+                        )
+                    }
+
+                    is NetworkState.Success -> {
+                        Text(
+                            "Hello, ${response.data.profileName ?: "Unknown"}!",
+                            color = Color.White,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(start = 24.dp, top = 6.dp)
+                        )
+
+
+                    }
+
+                    is NetworkState.Error -> {
+                        errorMessage =
+                            response.errorMessage ?: context.getString(R.string.error_message)
+
+                        Toast.makeText(
+                            context,
+                            errorMessage, Toast.LENGTH_SHORT
+                        ).show()
+
+                    }
+
+                    null -> {}
+
+                }
 
             }
 
+            Icon(imageVector = Icons.Rounded.Search,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier
+                    .padding(end=14.dp)
+
+                    .size(40.dp)
+                    .clickable {
+                        navController.navigate(Screens.Search)
+
+                    })
         }
-
-        Icon(imageVector = Icons.Rounded.Search,
-            contentDescription =null,
-            tint=Color.White,
-            modifier= Modifier
-                .size(40.dp)
-                .clickable {
-                    navController.navigate(Screens.Search)
-
-                } )
 
 
         Row(
@@ -350,6 +397,7 @@ fun MovieItems(imageUrl: String, onClick: () -> Unit) {
             .width(100.dp)
             .clickable { onClick() }
             .clip(shape = RoundedCornerShape(8.dp))
+            .border(brush =SolidColor(sky_blue), width = 1.5.dp, shape = RoundedCornerShape(8.dp) )
             .background(shape = RoundedCornerShape(8.dp), color = navy_blue)
     ) {
         AsyncImage(

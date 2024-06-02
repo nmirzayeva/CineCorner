@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.nurlanamirzayeva.gamejet.BuildConfig
 import com.nurlanamirzayeva.gamejet.network.ApiService
+import com.nurlanamirzayeva.gamejet.network.repositories.ActorPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.Repository
 import com.nurlanamirzayeva.gamejet.room.FavoriteFilmDao
@@ -31,4 +32,9 @@ object RepositoryModule {
         return  MainPageRepository(apiService,fireStore,auth,favoriteFilmDao)
     }
 
+    @Provides
+    @Singleton
+    fun provideActorPageRepository(apiService: ApiService):ActorPageRepository{
+        return  ActorPageRepository(apiService)
+    }
 }

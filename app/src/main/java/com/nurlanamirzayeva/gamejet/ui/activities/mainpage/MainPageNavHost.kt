@@ -15,6 +15,7 @@ import com.google.api.ResourceDescriptor.History
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.paging.SearchPagingSource
 import com.nurlanamirzayeva.gamejet.view.mainpage.MainPage
+import com.nurlanamirzayeva.gamejet.viewmodel.ActorViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.RegisterViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.SettingsViewModel
@@ -25,7 +26,8 @@ fun MainPageNavGraph(
     navController: NavHostController,
     mainPageViewModel: MainPageViewModel,
     settingsViewModel: SettingsViewModel,
-    viewModel: RegisterViewModel
+    viewModel: RegisterViewModel,
+    actorPageViewModel: ActorViewModel
 ) {
 
     NavHost(navController = navController, startDestination = Screens.MainPage) {
@@ -54,7 +56,7 @@ fun MainPageNavGraph(
             }
         }
         composable(route=Screens.Detail){
-            DetailScreen(mainPageViewModel=mainPageViewModel,navController=navController)
+            DetailScreen(mainPageViewModel=mainPageViewModel,navController=navController,actorPageViewModel=actorPageViewModel)
         }
 
         composable(route=Screens.DarkMode){
@@ -75,7 +77,9 @@ fun MainPageNavGraph(
         composable(route=Screens.EditProfile){
             EditProfileScreen(mainPageViewModel=mainPageViewModel, viewModel = viewModel, navController = navController)
         }
-
+        composable(route=Screens.Actors){
+            ActorsScreen(actorPageViewModel =actorPageViewModel,mainPageViewModel=mainPageViewModel,navController=navController )
+        }
     }
 }
 
@@ -91,6 +95,7 @@ object Screens {
     const val Search="Search"
     const val History="History"
     const val EditProfile="EditProfile"
+    const val Actors="Actors"
 }
 
 

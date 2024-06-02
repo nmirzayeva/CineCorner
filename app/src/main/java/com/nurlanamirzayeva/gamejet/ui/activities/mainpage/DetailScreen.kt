@@ -62,6 +62,7 @@ import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.sky_blue
 import com.nurlanamirzayeva.gamejet.utils.IMAGE_URL
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
+import com.nurlanamirzayeva.gamejet.viewmodel.ActorViewModel
 import com.nurlanamirzayeva.gamejet.viewmodel.MainPageViewModel
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
@@ -69,7 +70,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 
 
 @Composable
-fun DetailScreen(mainPageViewModel: MainPageViewModel, navController: NavHostController) {
+fun DetailScreen(mainPageViewModel: MainPageViewModel, navController: NavHostController,actorPageViewModel: ActorViewModel) {
     val detailItemState = mainPageViewModel.detailPageResponse.collectAsState()
     val videoItemState = mainPageViewModel.videoListResponse.collectAsState()
     val creditItemState = mainPageViewModel.creditListResponse.collectAsState()
@@ -272,13 +273,24 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel, navController: NavHostCon
                     if (selectedIndex == 0) {
                         creditItemState.value?.cast?.let { creditItem ->
                             items(items = creditItem) { credit ->
-                                ActorsItem(image = IMAGE_URL + credit!!.profilePath)
+                                ActorsItem(image = IMAGE_URL + credit?.profilePath, onClick={
+                                    credit?.id.let {creditId->
+                                      actorPageViewModel.personId.intValue= creditId ?:0
+                                    }
+                                    navController.navigate(Screens.Actors)
+                                })
                             }
                         }
                     } else {
                         similarItemState.value?.results?.let { similarItem ->
                             items(items = similarItem) { similar ->
-                                ActorsItem(image = IMAGE_URL + similar!!.posterPath)
+                                ActorsItem(image = IMAGE_URL + similar?.posterPath, onClick ={
+                                    similar?.id.let {similarId->
+                                        mainPageViewModel.movieId.intValue= similarId ?:0
+                                    }
+                                    navController.navigate(Screens.Detail)
+
+                                } )
                             }
                         }
                     }
@@ -403,12 +415,14 @@ fun convertToHours(minutes: Int): Pair<Int, Int> {
 }
 
 @Composable
-fun ActorsItem(image: String) {
+fun ActorsItem(image: String,onClick:()->Unit) {
     AsyncImage(
         model = image, contentDescription = "TabIndicatorImages", modifier = Modifier
             .height(130.dp)
             .width(80.dp)
+            .clickable { onClick() }
             .clip(shape = RoundedCornerShape(8.dp)), contentScale = ContentScale.FillBounds
+
     )
 }
 

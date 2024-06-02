@@ -1,5 +1,8 @@
 package com.nurlanamirzayeva.gamejet.network
 
+import com.nurlanamirzayeva.gamejet.model.ActorDetailResponse
+import com.nurlanamirzayeva.gamejet.model.ActorImageResponse
+import com.nurlanamirzayeva.gamejet.model.ActorMoviesResponse
 import com.nurlanamirzayeva.gamejet.model.CreditsResponse
 import com.nurlanamirzayeva.gamejet.model.DetailsResponse
 import com.nurlanamirzayeva.gamejet.model.DiscoverResponse
@@ -28,7 +31,6 @@ interface ApiService {
    suspend fun getSearchMovies(@Query("page")page:Int=1,@Query("query") query: String):Response<DiscoverResponse>
 
 
-
    @GET("movie/{movie_id}?api_key=$API_KEY")
    suspend fun getDetails(
       @Path("movie_id") movieId:Int
@@ -53,4 +55,20 @@ interface ApiService {
 suspend fun getReviews(
    @Path("movie_id") movieId: Int
 ):Response<ReviewsResponse>
+
+  @GET("person/{person_id}?api_key=$API_KEY")
+  suspend fun getActorDetails(
+     @Path("person_id") personId:Int
+  ):Response<ActorDetailResponse>
+
+   @GET("person/{person_id}/images?api_key=$API_KEY")
+   suspend fun getActorImages(
+      @Path("person_id") personId:Int
+   ):Response<ActorImageResponse>
+   @GET("person/{person_id}/movie_credits?api_key=$API_KEY")
+   suspend fun getActorMovies(
+      @Path("person_id") personId:Int
+   ):Response<ActorMoviesResponse>
+
+
 }

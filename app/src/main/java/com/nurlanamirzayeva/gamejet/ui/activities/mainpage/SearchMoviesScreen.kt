@@ -57,7 +57,7 @@ fun SearchMoviesScreen(mainPageViewModel: MainPageViewModel, navController: NavH
 }
 
 @Composable
-private fun SearchResult(movies: LazyPagingItems<ResultsItem>, onClick: (ResultsItem) -> Unit) {
+fun SearchResult(movies: LazyPagingItems<ResultsItem>, onClick: (ResultsItem) -> Unit) {
 
     LazyVerticalGrid(columns = GridCells.Fixed(4),
         modifier = Modifier

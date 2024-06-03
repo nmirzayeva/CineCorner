@@ -105,20 +105,19 @@ fun FavoriteScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCo
 
                     is NetworkState.Error -> {
 
-                   /*favoriteFilmLocal.value.let {favoriteFilmLocal->
-
-                       LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)){
-                           items(favoriteFilmLocal) { favoriteFilm ->
-                               FavoriteItem(item = favoriteFilm)
-                           }
-                       }
-
-                   }
-                      */
-
                     }
 
-                    else -> {}
+                    else -> {
+                        favoriteFilmLocal.value.let {favoriteFilmLocal->
+
+                            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)){
+                                items(favoriteFilmLocal) { favoriteFilm ->
+                                    FavoriteItem(item = favoriteFilm)
+                                }
+                            }
+
+                        }
+                    }
                 }
 
 

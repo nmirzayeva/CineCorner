@@ -257,7 +257,7 @@ class MainPageRepository @Inject constructor(
         favoriteFilmDao.insertFavoriteFilm(film)
     }
 
-   suspend fun getFavoriteLocal(userId: String): Flow<List<FavoriteFilm>> {
+   suspend fun getFavoriteLocal(userId: String):List<FavoriteFilm> {
          return favoriteFilmDao.getFavoritesFilms(userId)
     }
 

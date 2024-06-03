@@ -35,6 +35,7 @@ import com.nurlanamirzayeva.gamejet.utils.CONFIRM_PASSWORD
 import com.nurlanamirzayeva.gamejet.utils.NetworkState
 import com.nurlanamirzayeva.gamejet.utils.PASSWORD
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,81 +60,95 @@ class MainPageViewModel @Inject constructor(
     private val _trendingMovieResponse: MutableStateFlow<TrendingResponse?> = MutableStateFlow(null)
     val trendingMovieResponse = _trendingMovieResponse.asStateFlow()
 
-    private val _upcomingMoviesResponse:MutableStateFlow<UpcomingResponse?> =MutableStateFlow(null)
-    val upcomingMovieResponse=_upcomingMoviesResponse.asStateFlow()
+    private val _upcomingMoviesResponse: MutableStateFlow<UpcomingResponse?> =
+        MutableStateFlow(null)
+    val upcomingMovieResponse = _upcomingMoviesResponse.asStateFlow()
 
     private val _detailPageResponse: MutableStateFlow<DetailsResponse?> = MutableStateFlow(null)
     val detailPageResponse = _detailPageResponse.asStateFlow()
 
-    private val _videoListResponse:MutableStateFlow<NetworkState<Videos>?> = MutableStateFlow(null)
-    val videoListResponse= _videoListResponse.asStateFlow()
+    private val _videoListResponse: MutableStateFlow<NetworkState<Videos>?> = MutableStateFlow(null)
+    val videoListResponse = _videoListResponse.asStateFlow()
 
-    private val _creditListResponse:MutableStateFlow<CreditsResponse?> = MutableStateFlow(null)
-    val creditListResponse=_creditListResponse.asStateFlow()
+    private val _creditListResponse: MutableStateFlow<CreditsResponse?> = MutableStateFlow(null)
+    val creditListResponse = _creditListResponse.asStateFlow()
 
-    private val _similarListResponse:MutableStateFlow<SimilarMoviesResponse?> = MutableStateFlow(null)
-    val similarListResponse=_similarListResponse.asStateFlow()
+    private val _similarListResponse: MutableStateFlow<SimilarMoviesResponse?> =
+        MutableStateFlow(null)
+    val similarListResponse = _similarListResponse.asStateFlow()
 
-    private val _reviewListResponse:MutableStateFlow<ReviewsResponse?> = MutableStateFlow(null)
-    val reviewListResponse=_reviewListResponse.asStateFlow()
+    private val _reviewListResponse: MutableStateFlow<ReviewsResponse?> = MutableStateFlow(null)
+    val reviewListResponse = _reviewListResponse.asStateFlow()
 
-    private val _checkFavoriteResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
-    val checkFavoriteResponse=_checkFavoriteResponse.asStateFlow()
+    private val _checkFavoriteResponse: MutableStateFlow<NetworkState<Boolean>?> =
+        MutableStateFlow(null)
+    val checkFavoriteResponse = _checkFavoriteResponse.asStateFlow()
 
-    private val _checkHistoryResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
-    val checkHistoryResponse= _checkHistoryResponse.asStateFlow()
+    private val _checkHistoryResponse: MutableStateFlow<NetworkState<Boolean>?> =
+        MutableStateFlow(null)
+    val checkHistoryResponse = _checkHistoryResponse.asStateFlow()
 
-    private val _removeFavoriteResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
-    val removeFavoriteResponse=_removeFavoriteResponse.asStateFlow()
+    private val _removeFavoriteResponse: MutableStateFlow<NetworkState<Boolean>?> =
+        MutableStateFlow(null)
+    val removeFavoriteResponse = _removeFavoriteResponse.asStateFlow()
 
-    private val _removeHistoryResponse:MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
-    val removeHistoryResponse=_removeHistoryResponse.asStateFlow()
+    private val _removeHistoryResponse: MutableStateFlow<NetworkState<Boolean>?> =
+        MutableStateFlow(null)
+    val removeHistoryResponse = _removeHistoryResponse.asStateFlow()
 
-    private val _getFavoriteResponse:MutableStateFlow<NetworkState<List<FavoriteFilm>>?> = MutableStateFlow(null)
-    val getFavoriteResponse=_getFavoriteResponse.asStateFlow()
+    private val _getFavoriteResponse: MutableStateFlow<NetworkState<List<FavoriteFilm>>?> =
+        MutableStateFlow(null)
+    val getFavoriteResponse = _getFavoriteResponse.asStateFlow()
 
-    private val _getHistoryResponse:MutableStateFlow<NetworkState<List<FavoriteFilm>>?> = MutableStateFlow(null)
-    val getHistoryResponse= _getHistoryResponse.asStateFlow()
+    private val _getHistoryResponse: MutableStateFlow<NetworkState<List<FavoriteFilm>>?> =
+        MutableStateFlow(null)
+    val getHistoryResponse = _getHistoryResponse.asStateFlow()
 
     private val _favoriteFilms = MutableStateFlow<List<FavoriteFilm>>(emptyList())
-    val favoriteFilms= _favoriteFilms.asStateFlow()
+    val favoriteFilms = _favoriteFilms.asStateFlow()
 
     var errorMessage: String by mutableStateOf("")
 
-    var movieId = mutableIntStateOf(0 )
+    var movieId = mutableIntStateOf(0)
 
-    private val _profileInfo:MutableStateFlow<NetworkState<ProfileItemDTO>?> = MutableStateFlow(null)
-    val profileInfo=_profileInfo.asStateFlow()
+    private val _profileInfo: MutableStateFlow<NetworkState<ProfileItemDTO>?> =
+        MutableStateFlow(null)
+    val profileInfo = _profileInfo.asStateFlow()
 
     private val _filmDetails = MutableStateFlow<DetailsResponse?>(null)
     val filmDetails = _filmDetails.asStateFlow()
 
-    private val _addFavoriteFilms=MutableStateFlow<NetworkState<Boolean>?>(null)
+    private val _addFavoriteFilms = MutableStateFlow<NetworkState<Boolean>?>(null)
     val addFavoriteFilms = _addFavoriteFilms.asStateFlow()
 
-    private val _addHistory=MutableStateFlow<NetworkState<Boolean>?>(null)
+    private val _addHistory = MutableStateFlow<NetworkState<Boolean>?>(null)
     val addHistory = _addHistory.asStateFlow()
 
-    private val _updatePasswordResponse: MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
+    private val _updatePasswordResponse: MutableStateFlow<NetworkState<Boolean>?> =
+        MutableStateFlow(null)
     val updatePasswordResponse = _updatePasswordResponse.asStateFlow()
 
-    private val _updateUserProfileResponse: MutableStateFlow<NetworkState<Boolean>?> = MutableStateFlow(null)
+    private val _updateUserProfileResponse: MutableStateFlow<NetworkState<Boolean>?> =
+        MutableStateFlow(null)
     val updateUserProfileResponse = _updateUserProfileResponse.asStateFlow()
 
-    private val _profileImageUploadState:MutableStateFlow<NetworkState<String>?> = MutableStateFlow(null)
-    val profileImageUploadState= _profileImageUploadState.asStateFlow()
+    private val _profileImageUploadState: MutableStateFlow<NetworkState<String>?> =
+        MutableStateFlow(null)
+    val profileImageUploadState = _profileImageUploadState.asStateFlow()
 
     private val _profileImageUrl: MutableStateFlow<String?> = MutableStateFlow(null)
     val profileImageUrl: StateFlow<String?> = _profileImageUrl
 
-    val userId= auth.currentUser?.uid ?: "unknown"
+    val userId = auth.currentUser?.uid ?: "unknown"
 
     var searchQuery = MutableStateFlow("")
 
     private val _searchResults = MutableStateFlow<PagingData<ResultsItem>>(PagingData.empty())
-    val  searchResults:StateFlow<PagingData<ResultsItem>> =_searchResults.asStateFlow()
+    val searchResults: StateFlow<PagingData<ResultsItem>> = _searchResults.asStateFlow()
 
-
+    private val handler = CoroutineExceptionHandler { coroutineContext, throwable ->
+        throwable.printStackTrace()
+    }
 
 
     @OptIn(FlowPreview::class)
@@ -143,7 +158,10 @@ class MainPageViewModel @Inject constructor(
                 config = PagingConfig(pageSize = 20),
                 initialKey = 1,
                 pagingSourceFactory = {
-                    SearchPagingSource(mainPageRepository = mainPageRepository, searchTerm = searchTerm)
+                    SearchPagingSource(
+                        mainPageRepository = mainPageRepository,
+                        searchTerm = searchTerm
+                    )
                 }
             ).flow
                 .cachedIn(viewModelScope)
@@ -152,9 +170,8 @@ class MainPageViewModel @Inject constructor(
     }
 
 
-
     fun getFilmDetails() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + handler) {
             val response = detailPageRepository.getDetails(movieId.intValue)
             if (response.isSuccessful) {
                 _filmDetails.value = response.body()
@@ -165,8 +182,8 @@ class MainPageViewModel @Inject constructor(
 
     fun addFavorite(film: FavoriteFilm) {
         viewModelScope.launch(Dispatchers.IO) {
-            mainPageRepository.addFavoriteFilms(film).collectLatest {state->
-                _addFavoriteFilms.value=state
+            mainPageRepository.addFavoriteFilms(film).collectLatest { state ->
+                _addFavoriteFilms.value = state
 
             }
         }
@@ -175,30 +192,36 @@ class MainPageViewModel @Inject constructor(
 
     fun addHistory(film: FavoriteFilm) {
         viewModelScope.launch(Dispatchers.IO) {
-            mainPageRepository.addHistory(film).collectLatest {state->
-                _addHistory.value=state
+            mainPageRepository.addHistory(film).collectLatest { state ->
+                _addHistory.value = state
 
             }
         }
     }
 
-    fun getFavoriteFilms(){
-        viewModelScope.launch(Dispatchers.IO) {
-            _getFavoriteResponse.value=NetworkState.Loading()
-            mainPageRepository.getFavoriteFilms(movieId.intValue).collectLatest {state->
-                _getFavoriteResponse.value=state
+    fun getFavoriteFilms() {
+
+        viewModelScope.launch(Dispatchers.IO + handler) {
+            try{
+            _getFavoriteResponse.value = NetworkState.Loading()
+            mainPageRepository.getFavoriteFilms(movieId.intValue).collectLatest { state ->
+                _getFavoriteResponse.value = state
+            }
+            } catch (e: Exception){
+                errorMessage=e.message.toString()
             }
         }
+
+
 
     }
 
 
-
-    fun getHistory(){
+    fun getHistory() {
         viewModelScope.launch(Dispatchers.IO) {
-            _getHistoryResponse.value=NetworkState.Loading()
-            mainPageRepository.getHistory(movieId.intValue).collectLatest {state->
-                _getHistoryResponse.value=state
+            _getHistoryResponse.value = NetworkState.Loading()
+            mainPageRepository.getHistory(movieId.intValue).collectLatest { state ->
+                _getHistoryResponse.value = state
             }
         }
 
@@ -210,47 +233,54 @@ class MainPageViewModel @Inject constructor(
         }
     }
 
-    fun removeFavorite(removeMovieId:Int?=null) {
+    fun removeFavorite(removeMovieId: Int? = null) {
         viewModelScope.launch(Dispatchers.IO) {
-         mainPageRepository.removeFavoriteFilm(removeMovieId?:movieId.intValue).collectLatest {state->
-             _removeFavoriteResponse.value=state
-         }
+            mainPageRepository.removeFavoriteFilm(removeMovieId ?: movieId.intValue)
+                .collectLatest { state ->
+                    _removeFavoriteResponse.value = state
+                }
         }
     }
 
 
-    fun removeHistory(removeMovieId:Int?=null) {
+    fun removeHistory(removeMovieId: Int? = null) {
         viewModelScope.launch(Dispatchers.IO) {
-            mainPageRepository.removeHistory(removeMovieId?:movieId.intValue).collectLatest {state->
-                _removeHistoryResponse.value=state
-            }
+            mainPageRepository.removeHistory(removeMovieId ?: movieId.intValue)
+                .collectLatest { state ->
+                    _removeHistoryResponse.value = state
+                }
         }
     }
 
-    fun checkFavorite(){
+    fun checkFavorite() {
         viewModelScope.launch(Dispatchers.IO) {
-            mainPageRepository.checkFavoriteFilm(movieId.intValue).collectLatest {state->
-                _checkFavoriteResponse.value=state
-            }
-        }
-
-    }
-
-    fun checkHistory(){
-        viewModelScope.launch(Dispatchers.IO) {
-            mainPageRepository.checkHistoryFilm(movieId.intValue).collectLatest {state->
-                _checkHistoryResponse.value=state
+            mainPageRepository.checkFavoriteFilm(movieId.intValue).collectLatest { state ->
+                _checkFavoriteResponse.value = state
             }
         }
 
     }
 
+    fun checkHistory() {
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.checkHistoryFilm(movieId.intValue).collectLatest { state ->
+                _checkHistoryResponse.value = state
+            }
+        }
+
+    }
 
 
-    fun updateUserProfile(context: Context, name: String, email: String, newPassword:String, newConfirmPassword:String) {
+    fun updateUserProfile(
+        context: Context,
+        name: String,
+        email: String,
+        newPassword: String,
+        newConfirmPassword: String
+    ) {
         _updateUserProfileResponse.value = NetworkState.Loading()
 
-        if (newPassword!= newConfirmPassword) {
+        if (newPassword != newConfirmPassword) {
             _updateUserProfileResponse.value =
                 NetworkState.Error(context.getString(R.string.error_message))
             return
@@ -258,16 +288,17 @@ class MainPageViewModel @Inject constructor(
 
 
         viewModelScope.launch(Dispatchers.IO) {
-            mainPageRepository.updateUserProfile(name, email,newPassword,newConfirmPassword).collectLatest { state ->
-                _updateUserProfileResponse.value = state
-            }
+            mainPageRepository.updateUserProfile(name, email, newPassword, newConfirmPassword)
+                .collectLatest { state ->
+                    _updateUserProfileResponse.value = state
+                }
         }
     }
 
-    fun uploadProfileImage(uri: Uri){
+    fun uploadProfileImage(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
-            mainPageRepository.uploadProfileImage(uri).collectLatest {state->
-                _profileImageUploadState.value=state
+            mainPageRepository.uploadProfileImage(uri).collectLatest { state ->
+                _profileImageUploadState.value = state
                 if (state is NetworkState.Success) {
                     _profileImageUrl.value = state.data
                 }
@@ -352,16 +383,16 @@ class MainPageViewModel @Inject constructor(
         }
     }
 
-    fun getUpcomingMovies(){
+    fun getUpcomingMovies() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 mainPageRepository.getUpcomingMovies(page = 1).also {
-                    if(it.isSuccessful){
-                        _upcomingMoviesResponse.value=it.body()
+                    if (it.isSuccessful) {
+                        _upcomingMoviesResponse.value = it.body()
                     }
                 }
-            } catch (e:Exception){
-                errorMessage=e.message.toString()
+            } catch (e: Exception) {
+                errorMessage = e.message.toString()
             }
 
         }
@@ -371,12 +402,11 @@ class MainPageViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
 
             try {
-            val detailList= detailPageRepository.getDetails(movieId.intValue)
-                _detailPageResponse.value=detailList.body()
+                val detailList = detailPageRepository.getDetails(movieId.intValue)
+                _detailPageResponse.value = detailList.body()
 
-            }
-            catch (e:Exception){
-                errorMessage= e.message.toString()
+            } catch (e: Exception) {
+                errorMessage = e.message.toString()
             }
 
         }
@@ -384,31 +414,30 @@ class MainPageViewModel @Inject constructor(
     }
 
 
-    fun getVideos(){
+    fun getVideos() {
         viewModelScope.launch(Dispatchers.IO) {
 
             _videoListResponse.value = NetworkState.Loading()
             try {
                 val videoItems = detailPageRepository.getVideos(movieId.intValue)
                 videoItems.body()?.let {
-                    _videoListResponse.value= NetworkState.Success(data = it)
+                    _videoListResponse.value = NetworkState.Success(data = it)
                 }
 
-            }
-            catch (e:Exception){
-                errorMessage=e.message.toString()
-                _videoListResponse.value=NetworkState.Error(errorMessage = errorMessage)
+            } catch (e: Exception) {
+                errorMessage = e.message.toString()
+                _videoListResponse.value = NetworkState.Error(errorMessage = errorMessage)
             }
         }
 
     }
 
-     fun fetchUserData(){
+    fun fetchUserData() {
         viewModelScope.launch(Dispatchers.IO) {
-            auth.currentUser?.uid?.let {uid->
-                mainPageRepository.getUserData(uid).collectLatest{state->
-                    if(uid.isNotEmpty()) {
-                        _profileInfo.value=state
+            auth.currentUser?.uid?.let { uid ->
+                mainPageRepository.getUserData(uid).collectLatest { state ->
+                    if (uid.isNotEmpty()) {
+                        _profileInfo.value = state
                     }
                     if (state is NetworkState.Success) {
                         _profileImageUrl.value = state.data.profileImage
@@ -420,61 +449,53 @@ class MainPageViewModel @Inject constructor(
         }
     }
 
-    fun getFavoriteLocal(){
-        viewModelScope.launch(Dispatchers.IO) {
-      auth.currentUser?.uid?.let {uid->
-          mainPageRepository.getFavoriteLocal(uid).collectLatest {films->
-              _favoriteFilms.value=films
-
-          }
-
-
-
-
-}
-
-        }
-    }
-
-    fun getCredits(){
-
+    fun getFavoriteLocal() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val creditItems= detailPageRepository.getCredits(movieId.intValue)
-                _creditListResponse.value=creditItems.body()
-            }
-            catch(e:Exception){
+                auth.currentUser?.uid?.let { uid ->
+                    _favoriteFilms.value = mainPageRepository.getFavoriteLocal(uid)
+                }
+            }catch(e:Exception){
                 errorMessage=e.message.toString()
             }
         }
     }
 
-    fun getSimilar(){
+    fun getCredits() {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val similarItems= detailPageRepository.getSimilarMovies(movieId.intValue)
-                _similarListResponse.value= similarItems.body()
-            }
-            catch(e:Exception){
-                errorMessage=e.message.toString()
+                val creditItems = detailPageRepository.getCredits(movieId.intValue)
+                _creditListResponse.value = creditItems.body()
+            } catch (e: Exception) {
+                errorMessage = e.message.toString()
             }
         }
     }
 
-    fun getReviews(){
+    fun getSimilar() {
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val reviewItems= detailPageRepository.getReviews(movieId.intValue)
-                _reviewListResponse.value= reviewItems.body()
-            }
-            catch(e:Exception){
-                errorMessage=e.message.toString()
+                val similarItems = detailPageRepository.getSimilarMovies(movieId.intValue)
+                _similarListResponse.value = similarItems.body()
+            } catch (e: Exception) {
+                errorMessage = e.message.toString()
             }
         }
     }
 
+    fun getReviews() {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val reviewItems = detailPageRepository.getReviews(movieId.intValue)
+                _reviewListResponse.value = reviewItems.body()
+            } catch (e: Exception) {
+                errorMessage = e.message.toString()
+            }
+        }
+    }
 
 
     val discoverListPager = Pager(

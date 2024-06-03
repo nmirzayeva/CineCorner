@@ -217,15 +217,19 @@ fun DetailScreen(mainPageViewModel: MainPageViewModel, navController: NavHostCon
                                 .clickable {
                                     details.id?.let { movieId ->
                                         if (!isFavoriteFilm) {
-                                            mainPageViewModel.addFavorite(
-                                                FavoriteFilm(
-                                                    id = movieId,
-                                                    userId = mainPageViewModel.userId,
-                                                    title = details.title ?: "No Title",
-                                                    posterPath = details.posterPath,
-                                                    voteAverage = details.voteAverage as Double
-                                                )
-                                            )
+                                            with(FavoriteFilm(
+                                                id = movieId,
+                                                userId = mainPageViewModel.userId,
+                                                title = details.title ?: "No Title",
+                                                posterPath = details.posterPath,
+                                                voteAverage = details.voteAverage as Double
+                                            )){
+                                                mainPageViewModel.addFavorite(this)
+                                                mainPageViewModel.addFavoriteLocal(this)
+                                            }
+
+
+
                                         } else {
                                             mainPageViewModel.removeFavorite()
                                         }

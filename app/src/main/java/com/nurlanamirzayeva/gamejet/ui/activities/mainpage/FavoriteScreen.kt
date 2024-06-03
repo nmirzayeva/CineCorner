@@ -63,13 +63,12 @@ fun FavoriteScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCo
 
     val getFavoritesFilmsState = mainPageViewModel.getFavoriteResponse.collectAsState()
     val removeFavoriteState=mainPageViewModel.removeFavoriteResponse.collectAsState()
- val favoriteFilmLocal=mainPageViewModel.favoriteFilms.collectAsState()
+    val favoriteFilmLocal=mainPageViewModel.favoriteFilms.collectAsState()
 
     val context = LocalContext.current
 
     LaunchedEffect(mainPageViewModel.movieId.intValue) {
 
-        mainPageViewModel.getFilmDetails()
         mainPageViewModel.getFavoriteFilms()
         mainPageViewModel.getFavoriteLocal()
 
@@ -106,16 +105,16 @@ fun FavoriteScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCo
 
                     is NetworkState.Error -> {
 
-                   favoriteFilmLocal.value.let {it->
+                   /*favoriteFilmLocal.value.let {favoriteFilmLocal->
 
                        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)){
-                           items(it) { favoriteFilm ->
+                           items(favoriteFilmLocal) { favoriteFilm ->
                                FavoriteItem(item = favoriteFilm)
                            }
                        }
 
                    }
-
+                      */
 
                     }
 

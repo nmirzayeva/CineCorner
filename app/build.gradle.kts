@@ -88,6 +88,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
 
+
+    // Add this in addition to your other dependencies
+    implementation ("androidx.activity:activity:1.6.0-alpha05")
+
     //Retrofit for API requests
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

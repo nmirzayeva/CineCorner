@@ -11,8 +11,8 @@ import org.checkerframework.common.value.qual.IntRangeFromNonNegative
 
 @Dao
 interface FavoriteFilmDao {
-    @Query("select * from favorites where userId = :userId ")
-    fun getFavoritesFilms(userId:String): Flow<List<FavoriteFilm>>
+    @Query("select * from favorites where userId = :userId")
+    fun getFavoritesFilms(userId:String): List<FavoriteFilm>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFavoriteFilm(film:FavoriteFilm)

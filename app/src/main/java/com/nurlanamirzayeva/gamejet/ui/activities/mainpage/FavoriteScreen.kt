@@ -70,7 +70,7 @@ fun FavoriteScreen(mainPageViewModel: MainPageViewModel,navController: NavHostCo
     LaunchedEffect(mainPageViewModel.movieId.intValue) {
 
         mainPageViewModel.getFavoriteFilms()
-        mainPageViewModel.getFavoriteLocal()
+        //mainPageViewModel.getFavoriteLocal()
 
     }
 

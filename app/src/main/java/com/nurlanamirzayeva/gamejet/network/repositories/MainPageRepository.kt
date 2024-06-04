@@ -64,11 +64,10 @@ class MainPageRepository @Inject constructor(
     }
 
 
-    suspend fun updateUserProfile(
+    suspend fun updateUserEmailAndName(
         name: String,
         email: String,
-        newPassword: String,
-        newConfirmPassword: String
+
     ) = callbackFlow<NetworkState<Boolean>> {
         val currentUser = auth.currentUser
         if (currentUser == null) {
@@ -86,12 +85,7 @@ class MainPageRepository @Inject constructor(
                     if (!task.isSuccessful) {
                         trySend(NetworkState.Error("Email update verification failed"))
                     }
-                }.await()
-            }
-
-            if (newPassword.isNotEmpty() && newPassword == newConfirmPassword) {
-                currentUser.updatePassword(newPassword).await()
-                userMap["password"] = newPassword
+                }
             }
 
             fireStore.collection("users").document(userId).set(userMap).addOnSuccessListener {
@@ -105,6 +99,39 @@ class MainPageRepository @Inject constructor(
         awaitClose { channel.close() }
     }
 
+
+
+    suspend fun updateUserPassword(newPassword: String, newConfirmPassword: String) = callbackFlow<NetworkState<Boolean>> {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            trySend(NetworkState.Error("User not authenticated"))
+            awaitClose { channel.close() }
+            return@callbackFlow
+        }
+
+        val userId = currentUser.uid
+
+        try {
+            if (newPassword.isNotEmpty() && newPassword == newConfirmPassword) {
+                currentUser.updatePassword(newPassword)
+
+                fireStore.collection("users").document(userId)
+                    .update("password", newPassword, "confirm_password", newConfirmPassword)
+                    .addOnSuccessListener {
+                        trySend(NetworkState.Success(true))
+                    }
+                    .addOnFailureListener {
+                        trySend(NetworkState.Error(it.localizedMessage))
+                    }
+            } else {
+                trySend(NetworkState.Error("Passwords do not match or are empty"))
+            }
+        } catch (e: Exception) {
+            trySend(NetworkState.Error(e.localizedMessage))
+        }
+
+        awaitClose { channel.close() }
+    }
 
     suspend fun addFavoriteFilms(film: FavoriteFilm) = callbackFlow<NetworkState<Boolean>> {
         val userId = auth.currentUser?.uid

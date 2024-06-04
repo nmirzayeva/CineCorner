@@ -31,6 +31,7 @@ class Repository @Inject constructor(
 
         val successListener = OnCompleteListener<Void> {
             if (it.isSuccessful) {
+
                 trySend(NetworkState.Success(true))
             } else {
                 trySend(NetworkState.Error(errorMessage = null))
@@ -49,7 +50,21 @@ class Repository @Inject constructor(
             userId?.let { uid ->
                 userMap[UID] = uid
                 database.document(uid).set(userMap)
-                    .addOnFailureListener(failureListener).addOnCompleteListener(successListener)
+                    .addOnFailureListener(failureListener).addOnCompleteListener { emailVerify ->
+                        if (emailVerify.isSuccessful) {
+                            it.user?.sendEmailVerification()?.addOnCompleteListener { emailTask ->
+                                if (emailTask.isSuccessful) {
+                                    trySend(NetworkState.Success(true))
+                                } else {
+                                    trySend(NetworkState.Error(emailTask.exception?.localizedMessage))
+                                }
+
+                            }
+                        } else {
+                            trySend(NetworkState.Error(emailVerify.exception?.localizedMessage))
+                        }
+
+                    }
             }
         }.addOnFailureListener {
             trySend(NetworkState.Error(it.localizedMessage))
@@ -63,11 +78,17 @@ class Repository @Inject constructor(
     }
 
 
-
     suspend fun signIn(email: String, password: String) = callbackFlow<NetworkState<Boolean>> {
 
-        val successListener = OnSuccessListener<AuthResult> {
-            trySend(NetworkState.Success(true))
+        val successListener = OnSuccessListener<AuthResult> {authResult->
+            val user=authResult.user
+            if(user!=null && user.isEmailVerified){
+                trySend(NetworkState.Success(true))
+            }else{
+                trySend(NetworkState.Error("Email not verified. Please verify your email."))
+                auth.signOut()
+            }
+
         }
 
         val failureListener = object : OnFailureListener {

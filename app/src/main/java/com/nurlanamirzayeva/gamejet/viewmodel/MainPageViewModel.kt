@@ -143,6 +143,7 @@ class MainPageViewModel @Inject constructor(
 
     var searchQuery = MutableStateFlow("")
 
+
     private val _searchResults = MutableStateFlow<PagingData<ResultsItem>>(PagingData.empty())
     val searchResults: StateFlow<PagingData<ResultsItem>> = _searchResults.asStateFlow()
 
@@ -275,22 +276,35 @@ class MainPageViewModel @Inject constructor(
         context: Context,
         name: String,
         email: String,
-        newPassword: String,
-        newConfirmPassword: String
+
     ) {
         _updateUserProfileResponse.value = NetworkState.Loading()
 
+        viewModelScope.launch(Dispatchers.IO) {
+            mainPageRepository.updateUserEmailAndName(name, email)
+                .collectLatest { state ->
+                    _updateUserProfileResponse.value = state
+                }
+        }
+    }
+
+    fun updateUserPassword(
+        context: Context,
+        newPassword: String,
+        newConfirmPassword: String
+    ) {
+        _updatePasswordResponse.value = NetworkState.Loading()
+
         if (newPassword != newConfirmPassword) {
-            _updateUserProfileResponse.value =
+            _updatePasswordResponse.value =
                 NetworkState.Error(context.getString(R.string.error_message))
             return
         }
 
-
         viewModelScope.launch(Dispatchers.IO) {
-            mainPageRepository.updateUserProfile(name, email, newPassword, newConfirmPassword)
+            mainPageRepository.updateUserPassword(newPassword, newConfirmPassword)
                 .collectLatest { state ->
-                    _updateUserProfileResponse.value = state
+                    _updatePasswordResponse.value = state
                 }
         }
     }
@@ -337,6 +351,9 @@ class MainPageViewModel @Inject constructor(
         _updateUserProfileResponse.value = null
     }
 
+    fun resetEditPassword() {
+        _updatePasswordResponse.value = null
+    }
 
     fun getMovieList() {
 
@@ -527,5 +544,73 @@ class MainPageViewModel @Inject constructor(
             UpcomingPagingSource(mainPageRepository)
         }
     ).flow.cachedIn(viewModelScope)
+
+
+    fun errorMessageProfile(email: String): String? {
+        var message: String? = null
+        if (email.isEmpty()) {
+
+            message = "Please fill out e-mail field"
+            return message
+
+        }
+
+
+        if (!isEmailValid(email)) {
+            message = "Incorrect email"
+            return message
+        }
+
+        return message
+    }
+
+    fun errorMessagePassword(password: String, confirmPassword: String?): String? {
+        var message: String? = null
+
+        if (password.isEmpty()) {
+
+            message = "Please fill out password field"
+            return message
+        }
+        confirmPassword?.let {
+            if (it.isEmpty()) {
+
+                message = "Please confirm the password "
+                return message
+            }
+        }
+
+
+        if (!isPasswordValid(password)) {
+            message = "Incorrect password"
+            return message
+
+        }
+
+        return message
+    }
+
+
+    fun isEmailValid(email: String): Boolean {
+        val emailPattern = Regex("[a-zA-Z0–9._-]+@[a-z]+\\.+[a-z]+")
+        return emailPattern.matches(email)
+    }
+
+
+    fun isPasswordValid(password: String): Boolean {
+        val passwordPattern =
+            Regex("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}\$")
+        return passwordPattern.matches(password)
+
+    }
+
+    fun isConfirmPasswordValid(confirmPassword: String): Boolean {
+        val passwordPattern =
+            Regex("^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@\$!%*?&])[A-Za-z\\d@\$!%*?&]{8,}\$")
+        return passwordPattern.matches(confirmPassword)
+
+    }
+
+
 
 }

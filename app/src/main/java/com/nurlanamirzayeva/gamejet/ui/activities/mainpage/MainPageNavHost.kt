@@ -75,7 +75,10 @@ fun MainPageNavGraph(
             HistoryScreen(mainPageViewModel=mainPageViewModel,navController=navController)
         }
         composable(route=Screens.EditProfile){
-            EditProfileScreen(mainPageViewModel=mainPageViewModel, viewModel = viewModel, navController = navController)
+            EditProfileScreen(mainPageViewModel=mainPageViewModel, navController = navController)
+        }
+        composable(route=Screens.EditPassword){
+            EditPasswordScreen(mainPageViewModel=mainPageViewModel, navController = navController)
         }
         composable(route=Screens.Actors){
             ActorsScreen(actorPageViewModel =actorPageViewModel,mainPageViewModel=mainPageViewModel,navController=navController )
@@ -95,6 +98,7 @@ object Screens {
     const val Search="Search"
     const val History="History"
     const val EditProfile="EditProfile"
+    const val EditPassword="EditPassword"
     const val Actors="Actors"
 }
 

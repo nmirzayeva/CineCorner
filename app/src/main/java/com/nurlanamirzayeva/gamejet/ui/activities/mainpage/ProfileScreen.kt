@@ -250,9 +250,22 @@ fun ProfileScreen(navController: NavHostController, mainPageViewModel: MainPageV
             modifier = Modifier.padding(start = 14.dp, top = 24.dp)
         )
 
-        helpAndSupportAccounts.forEach { helpAndSupportAccountItem ->
-            ProfileItem(text = helpAndSupportAccountItem)
+        helpAndSupportAccounts.forEachIndexed { index,helpAndSupportAccountsItem  ->
+            when (index) {
+                0 -> ProfileItem(
+                    text = helpAndSupportAccountsItem,
+                    onClick = { navController.navigate(Screens.EditPassword) })
 
+                1 -> ProfileItem(
+                    text = helpAndSupportAccountsItem,
+                    onClick = { navController.navigate(Screens.History) })
+
+                2 -> ProfileItem(
+                    text =helpAndSupportAccountsItem,
+                    onClick = { navController.navigate(Screens.EditProfile) })
+
+
+            }
         }
         Text(
             "Log Out",

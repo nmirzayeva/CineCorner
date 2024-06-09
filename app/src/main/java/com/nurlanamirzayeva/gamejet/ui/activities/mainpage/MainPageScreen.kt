@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,9 +58,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.model.ResultsItem
+import com.nurlanamirzayeva.gamejet.network.networkConnection.NetworkConnection
 import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
 import com.nurlanamirzayeva.gamejet.ui.activities.mainpage.Screens
 import com.nurlanamirzayeva.gamejet.ui.components.SearchBar
+import com.nurlanamirzayeva.gamejet.ui.components.ShimmerEffect
 import com.nurlanamirzayeva.gamejet.ui.theme.dark_grey
 import com.nurlanamirzayeva.gamejet.ui.theme.navy_blue
 import com.nurlanamirzayeva.gamejet.ui.theme.sky_blue
@@ -84,9 +87,10 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
         mutableStateOf<String?>(null)
     }
     val context = LocalContext.current
+    val connectivity = remember { NetworkConnection(context) }
+    val isConnected by connectivity.isConnected.observeAsState(initial = true)
 
-
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = isConnected) {
         mainPageViewModel.getMovieList()
         mainPageViewModel.getTrendingNow()
         mainPageViewModel.getUpcomingMovies()
@@ -116,7 +120,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
             Row {
 
 
-                when (val response=profileItemState.value) {
+                when (val response = profileItemState.value) {
 
                     is NetworkState.Loading -> {
                         CircularProgressIndicator(
@@ -125,6 +129,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                                 .size(50.dp)
                         )
                     }
+
                     is NetworkState.Success -> {
 
                         AsyncImage(
@@ -192,7 +197,7 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                 contentDescription = null,
                 tint = Color.White,
                 modifier = Modifier
-                    .padding(end=14.dp)
+                    .padding(end = 14.dp)
 
                     .size(40.dp)
                     .clickable {
@@ -382,13 +387,18 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 }
 
 
-
-
-
-
-
 @Composable
 fun MovieItems(imageUrl: String, onClick: () -> Unit) {
+    var isLoading by remember {
+        mutableStateOf(true)
+    }
+
+    val context = LocalContext.current
+    val connectivity = remember {
+        NetworkConnection(context)
+    }
+    val isConnected by connectivity.isConnected.observeAsState(initial = true)
+
 
 
     Box(
@@ -397,18 +407,29 @@ fun MovieItems(imageUrl: String, onClick: () -> Unit) {
             .width(100.dp)
             .clickable { onClick() }
             .clip(shape = RoundedCornerShape(8.dp))
-            .border(brush =SolidColor(sky_blue), width = 1.5.dp, shape = RoundedCornerShape(8.dp) )
+            .border(brush = SolidColor(sky_blue), width = 1.5.dp, shape = RoundedCornerShape(8.dp))
             .background(shape = RoundedCornerShape(8.dp), color = navy_blue)
     ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = null,
-            modifier = Modifier
-                .height(150.dp)
-                .width(100.dp)
-                .background(shape = RoundedCornerShape(8.dp), color = Color.Transparent)
+        if (!isConnected || isLoading) {
+            ShimmerEffect(
+                modifier = Modifier
+                    .height(150.dp)
+                    .width(100.dp)
+                    .clip(shape = RoundedCornerShape(8.dp))
+            )
 
-        )
+        }
+
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .height(150.dp)
+                    .width(100.dp)
+                    .background(shape = RoundedCornerShape(8.dp), color = Color.Transparent)
+
+            )
+
 
     }
 }

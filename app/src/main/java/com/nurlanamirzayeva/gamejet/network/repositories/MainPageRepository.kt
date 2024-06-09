@@ -77,7 +77,7 @@ class MainPageRepository @Inject constructor(
         }
 
         val userId = currentUser.uid
-        val userMap = hashMapOf("user_name" to name, "email" to email)
+        val userMap = mapOf("user_name" to name, "email" to email)
 
         try {
             if (email != currentUser.email) {
@@ -88,7 +88,7 @@ class MainPageRepository @Inject constructor(
                 }
             }
 
-            fireStore.collection("users").document(userId).set(userMap).addOnSuccessListener {
+            fireStore.collection("users").document(userId).update(userMap).addOnSuccessListener {
                 trySend(NetworkState.Success(true))
             }.addOnFailureListener {
                 trySend(NetworkState.Error(it.localizedMessage))

@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,8 +80,6 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
     val upcomingMoviesState = mainPageViewModel.upcomingMovieResponse.collectAsState()
     val profileItemState = mainPageViewModel.profileInfo.collectAsState()
     val removeHistoryState = mainPageViewModel.removeHistoryResponse.collectAsState()
-    val profileImageUploadState = mainPageViewModel.profileImageUploadState.collectAsState()
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
 
     var errorMessage by remember {
@@ -88,24 +87,20 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
     }
     val context = LocalContext.current
     val connectivity = remember { NetworkConnection(context) }
-    val isConnected by connectivity.isConnected.observeAsState(initial = true)
+    val isConnected by connectivity.isConnected.collectAsState()
 
     LaunchedEffect(key1 = isConnected) {
-        mainPageViewModel.getMovieList()
-        mainPageViewModel.getTrendingNow()
-        mainPageViewModel.getUpcomingMovies()
-        mainPageViewModel.fetchUserData()
-    }
-
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            if (uri != null) {
-                selectedImageUri = uri
-                mainPageViewModel.uploadProfileImage(uri)
+        isConnected?.let {
+            if (it) {
+                mainPageViewModel.getMovieList()
+                mainPageViewModel.getTrendingNow()
+                mainPageViewModel.getUpcomingMovies()
+                mainPageViewModel.fetchUserData()
             }
         }
-    )
+
+    }
+
 
     Column(
         modifier = Modifier
@@ -249,6 +244,15 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                     })
 
                 }
+            } ?: run {
+                items(20) {
+                    ShimmerEffect(
+                        modifier = Modifier
+                            .height(150.dp)
+                            .width(100.dp)
+                            .clip(shape = RoundedCornerShape(8.dp))
+                    )
+                }
             }
 
         }
@@ -296,6 +300,15 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
                     })
 
+                }
+            } ?: run {
+                items(20) {
+                    ShimmerEffect(
+                        modifier = Modifier
+                            .height(150.dp)
+                            .width(100.dp)
+                            .clip(shape = RoundedCornerShape(8.dp))
+                    )
                 }
             }
 
@@ -347,6 +360,15 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
                     })
 
                 }
+            } ?: run {
+                items(20) {
+                    ShimmerEffect(
+                        modifier = Modifier
+                            .height(150.dp)
+                            .width(100.dp)
+                            .clip(shape = RoundedCornerShape(8.dp))
+                    )
+                }
             }
 
         }
@@ -389,17 +411,6 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
 
 @Composable
 fun MovieItems(imageUrl: String, onClick: () -> Unit) {
-    var isLoading by remember {
-        mutableStateOf(true)
-    }
-
-    val context = LocalContext.current
-    val connectivity = remember {
-        NetworkConnection(context)
-    }
-    val isConnected by connectivity.isConnected.observeAsState(initial = true)
-
-
 
     Box(
         modifier = Modifier
@@ -410,15 +421,6 @@ fun MovieItems(imageUrl: String, onClick: () -> Unit) {
             .border(brush = SolidColor(sky_blue), width = 1.5.dp, shape = RoundedCornerShape(8.dp))
             .background(shape = RoundedCornerShape(8.dp), color = navy_blue)
     ) {
-        if (!isConnected || isLoading) {
-            ShimmerEffect(
-                modifier = Modifier
-                    .height(150.dp)
-                    .width(100.dp)
-                    .clip(shape = RoundedCornerShape(8.dp))
-            )
-
-        }
 
             AsyncImage(
                 model = imageUrl,

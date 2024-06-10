@@ -2,6 +2,7 @@ package com.nurlanamirzayeva.gamejet.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +26,7 @@ import com.nurlanamirzayeva.gamejet.model.SimilarMoviesResponse
 import com.nurlanamirzayeva.gamejet.model.TrendingResponse
 import com.nurlanamirzayeva.gamejet.model.UpcomingResponse
 import com.nurlanamirzayeva.gamejet.model.Videos
+import com.nurlanamirzayeva.gamejet.network.networkConnection.NetworkConnection
 import com.nurlanamirzayeva.gamejet.network.repositories.DetailPageRepository
 import com.nurlanamirzayeva.gamejet.network.repositories.MainPageRepository
 import com.nurlanamirzayeva.gamejet.paging.SearchPagingSource
@@ -365,9 +367,8 @@ class MainPageViewModel @Inject constructor(
                 mainPageRepository.getMovies(page = 1).also {
 
                     if (it.isSuccessful) {
-
+                        Log.d("TAG", "getMovieList: get the movie list in view model")
                         _movieListResponse.value = it.body()
-
 
                     }
 

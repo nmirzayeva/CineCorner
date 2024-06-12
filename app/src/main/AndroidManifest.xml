@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"
         tools:ignore="ScopedStorage" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 
     <application
@@ -20,7 +23,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GameJet"
-        tools:targetApi="tiramisu" >
+        tools:targetApi="tiramisu">
         <activity
             android:name=".view.login.HomeActivity"
             android:exported="true">
@@ -32,8 +35,18 @@
         <activity
             android:name=".ui.activities.mainpage.MainPageActivity"
             android:exported="true"
-            android:theme="@style/Theme.GameJet" >
-        </activity>
+            android:theme="@style/Theme.GameJet" />
+
+        <receiver
+            android:name=".network.networkConnection.ConnectivityReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action
+                    android:name="android.net.conn.CONNECTIVITY_CHANGE"
+                    tools:ignore="BatteryLife" />
+
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

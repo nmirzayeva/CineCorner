@@ -59,6 +59,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.nurlanamirzayeva.gamejet.R
 import com.nurlanamirzayeva.gamejet.model.ResultsItem
+import com.nurlanamirzayeva.gamejet.network.networkConnection.ConnectivityReceiver
 import com.nurlanamirzayeva.gamejet.network.networkConnection.NetworkConnection
 import com.nurlanamirzayeva.gamejet.room.FavoriteFilm
 import com.nurlanamirzayeva.gamejet.ui.activities.mainpage.Screens
@@ -87,10 +88,15 @@ fun MainPage(mainPageViewModel: MainPageViewModel, navController: NavHostControl
     }
     val context = LocalContext.current
     val connectivity = remember { NetworkConnection(context) }
-    val isConnected by connectivity.isConnected.collectAsState()
+    var isConnected by remember { mutableStateOf(true) }
+
+    ConnectivityReceiver(context){isConnectedNetwork->
+        isConnected=isConnectedNetwork
+
+    }
 
     LaunchedEffect(key1 = isConnected) {
-        isConnected?.let {
+        isConnected.let {
             if (it) {
                 mainPageViewModel.getMovieList()
                 mainPageViewModel.getTrendingNow()
